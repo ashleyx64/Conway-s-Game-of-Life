@@ -1,5 +1,5 @@
 # Conway's Game of Life
-<p><b>A version of Conway's Game of Life created using JavaFX</b>/<p>
+<p><b>A version of Conway's Game of Life created using JavaFX</b></p>
 <p>Features:</p>
 <ul>
   <li>Play/pause button</li>
