@@ -14,7 +14,7 @@ public class GameController {
     private final GraphicsContext gc;
     private boolean wrap;
     
-    public GameController(int width, int height, int factor, GraphicsContext gc) {
+    public GameController(int width, int height, int factor, GraphicsContext gc, boolean example) {
         this.width = width;
         this.height = height;
         this.factor = factor;
@@ -25,7 +25,9 @@ public class GameController {
                 gameMap[i][j] = new Cell();
             }
         }
-        placeExample();
+        if (example) {
+            placeExample();
+        }
     }
     
     private void placeExample() {

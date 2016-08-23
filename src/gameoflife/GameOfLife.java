@@ -4,7 +4,9 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -15,29 +17,104 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 public class GameOfLife extends Application {
-    private boolean updateStates = false;
-    private int refreshRate = 240;
+    private static boolean updateStates = false, example = false;
+    private static int refreshRate = 240;
+    private static int width = 50, height = 50;
+    private static final int factor = 20;
+        
+    private static BorderPane root2;
+    private static Canvas gameDisplay;
+    private static GraphicsContext gc;
+    private static GameController game;
+    private static FlowPane toolbar;
+    private static Button playPauseBtn, clearBtn;
+    private static Label refreshRateLbl;
+    private static TextField refreshRateTxtFld;
+    private static Button refreshRateUpdateBtn;
+    private static CheckBox modeChkBx;
+    private static Scene scene2;
+    private static Stage secondaryStage;
     
     @Override
-    public void start(Stage primaryStage) {
-        final int width = 50, height = 50, factor = 20;
-        final BorderPane root = new BorderPane();
-        final Canvas gameDisplay = new Canvas(width * factor, height * factor);
-        final GraphicsContext gc = gameDisplay.getGraphicsContext2D();
-        final GameController game = new GameController(width, height, factor, gc);
-        final FlowPane toolbar = new FlowPane(5, 0);
-        toolbar.setPadding(new Insets(5));
-        final Button playPauseBtn = new Button("Play");
+    public void start(final Stage primaryStage) {
+        final BorderPane root1 = new BorderPane();
+        root1.setPadding(new Insets(5));
+        
+        final Label introLbl = new Label("Welcome to Conway's Game of Life!");
+        BorderPane.setAlignment(introLbl, Pos.CENTER);
+        
+        final GridPane options = new GridPane();
+        options.setPadding(new Insets(5));
+        options.setHgap(5);
+        options.setVgap(5);
+        final Label widthLbl = new Label("Width:");
+        
+        final TextField widthTxtFld = new TextField(String.valueOf(width));
+        widthTxtFld.setPrefWidth(40);
+        
+        final Label heightLbl = new Label("Height:");
+        
+        final TextField heightTxtFld = new TextField(String.valueOf(height));
+        heightTxtFld.setPrefWidth(40);
+        
+        final CheckBox exampleChkBx = new CheckBox("Generate example");
+        GridPane.setHalignment(exampleChkBx, HPos.CENTER);
+        
+        final Button confirmBtn = new Button("Confirm");
+        BorderPane.setAlignment(confirmBtn, Pos.CENTER);
+        
+        final Scene scene1 = new Scene(root1);
+        
+        options.add(widthLbl, 0, 0, 1, 1);
+        options.add(widthTxtFld, 1, 0, 1, 1);
+        options.add(heightLbl, 2, 0, 1, 1);
+        options.add(heightTxtFld, 3, 0, 1, 1);
+        options.add(exampleChkBx, 0, 1, 4, 1);
+        
+        root1.setTop(introLbl);
+        root1.setCenter(options);
+        root1.setBottom(confirmBtn);
+        
+        primaryStage.setTitle("CGoL");
+        primaryStage.setScene(scene1);
+        primaryStage.show();
+        
+        confirmBtn.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                primaryStage.hide();
+                width = Integer.parseInt(widthTxtFld.getText());
+                height = Integer.parseInt(heightTxtFld.getText());
+                example = exampleChkBx.isSelected();
+                initialiseStage2();
+            }
+        
+        });
+        
+    }
+    
+    private static void initialiseStage2() {
+        root2 = new BorderPane();
+        gameDisplay = new Canvas(width * factor, height * factor);
+        gc = gameDisplay.getGraphicsContext2D();
+        game = new GameController(width, height, factor, gc, example);
+        toolbar = new FlowPane(5, 5);
+        toolbar.setPadding(new Insets(5));  
+        playPauseBtn = new Button("Play");
         playPauseBtn.setPrefWidth(55);
-        final Button clearBtn = new Button("Clear");
-        final Label refreshRateLbl = new Label("Refresh rate (delay between frames in ms):");
-        final TextField refreshRateTxtFld = new TextField(String.valueOf(refreshRate));
-        final Button refreshRateUpdateBtn = new Button("Update");
-        final CheckBox modeChkBx = new CheckBox("Wrap edges");
-        final Scene scene = new Scene(root);
+        clearBtn = new Button("Clear");
+        refreshRateLbl = new Label("Refresh rate (delay between frames in ms):");
+        refreshRateTxtFld = new TextField(String.valueOf(refreshRate));
+        refreshRateTxtFld.setPrefWidth(60);
+        refreshRateUpdateBtn = new Button("Update");
+        modeChkBx = new CheckBox("Wrap edges");
+        scene2 = new Scene(root2);
+        secondaryStage = new Stage();
         
         new AnimationTimer() {
             
@@ -106,12 +183,12 @@ public class GameOfLife extends Application {
         });
         
         toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, modeChkBx);
-        root.setBottom(gameDisplay);
-        root.setTop(toolbar);
+        root2.setBottom(gameDisplay);
+        root2.setTop(toolbar);
         
-        primaryStage.setTitle("Conway's Game of Life");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        secondaryStage.setTitle("Conway's Game of Life");
+        secondaryStage.setScene(scene2);
+        secondaryStage.show();
     }
 
     /**
