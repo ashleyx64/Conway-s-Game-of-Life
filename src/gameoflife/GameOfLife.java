@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
@@ -35,6 +36,7 @@ public class GameOfLife extends Application {
         final Label refreshRateLbl = new Label("Refresh rate (delay between frames in ms):");
         final TextField refreshRateTxtFld = new TextField(String.valueOf(refreshRate));
         final Button refreshRateUpdateBtn = new Button("Update");
+        final CheckBox modeChkBx = new CheckBox("Wrap edges");
         final Scene scene = new Scene(root);
         
         new AnimationTimer() {
@@ -43,6 +45,11 @@ public class GameOfLife extends Application {
             
             @Override
             public void handle(long currentNanoTime) {
+                if (modeChkBx.isSelected()) {
+                    game.setWrap(true);
+                } else {
+                    game.setWrap(false);
+                }
                 if (updateStates && currentNanoTime - prevNanoTime >= refreshRate * 1_000_000) {
                     prevNanoTime = currentNanoTime;
                     game.updateStates();
@@ -98,7 +105,7 @@ public class GameOfLife extends Application {
             
         });
         
-        toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn);
+        toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, modeChkBx);
         root.setBottom(gameDisplay);
         root.setTop(toolbar);
         

@@ -12,6 +12,7 @@ public class GameController {
     private final int width, height, factor;
     private final Cell[][] gameMap;
     private final GraphicsContext gc;
+    private boolean wrap;
     
     public GameController(int width, int height, int factor, GraphicsContext gc) {
         this.width = width;
@@ -91,8 +92,16 @@ public class GameController {
         for (int i = y - 1; i < y + 2; i++) {
             for (int j = x - 1; j < x + 2; j++) {
                 if (!(i == y && j == x)) {
-                    if (gameMap[getWrapped(i, height)][getWrapped(j, width)].getAlive()) {
-                        sum++;
+                    if (wrap) {
+                        if (gameMap[getWrapped(i, height)][getWrapped(j, width)].getAlive()) {
+                            sum++;
+                        }
+                    } else {
+                        if (i >= 0 && i < height && j >= 0 && j < width) {
+                            if (gameMap[i][j].getAlive()) {
+                                sum++;
+                            }
+                        }
                     }
                 }
             }
@@ -120,5 +129,9 @@ public class GameController {
                 gameMap[i][j].setAlive(false);
             }
         }
+    }
+    
+    public void setWrap(boolean wrap) {
+        this.wrap = wrap;
     }
 }
