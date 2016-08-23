@@ -1,25 +1,51 @@
 package gameoflife;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class GameController {
     private final int width, height, factor;
     private final Cell[][] gameMap;
+    private final GraphicsContext gc;
     
-    public GameController(int width, int height, int factor) {
+    public GameController(int width, int height, int factor, GraphicsContext gc) {
         this.width = width;
         this.height = height;
         this.factor = factor;
+        this.gc = gc;
         gameMap = new Cell[height][width];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 gameMap[i][j] = new Cell();
             }
         }
+        placeExample();
     }
     
-    public void drawGame(GraphicsContext gc) {
+    private void placeExample() {
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(new File("src\\gameoflife\\exampleTemplate.txt"));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        int startX = width / 2 - 7, startY = height / 2 - 7;
+        for (int i = 0; i < 13; i++) {
+            String line = scanner.next();
+            for (int j = 0; j < 13; j++) {
+                if (line.charAt(j) == 'X') {
+                    gameMap[i + startY][j + startX].setAlive(true);
+                }
+            }
+        }
+    }
+    
+    public void drawGame() {
         gc.setStroke(Color.SILVER);
         gc.setLineWidth(2);
         for (int i = 0; i < height; i++) {

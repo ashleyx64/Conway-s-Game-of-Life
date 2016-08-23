@@ -26,7 +26,7 @@ public class GameOfLife extends Application {
         final BorderPane root = new BorderPane();
         final Canvas gameDisplay = new Canvas(width * factor, height * factor);
         final GraphicsContext gc = gameDisplay.getGraphicsContext2D();
-        final GameController game = new GameController(width, height, factor);
+        final GameController game = new GameController(width, height, factor, gc);
         final FlowPane toolbar = new FlowPane(5, 0);
         toolbar.setPadding(new Insets(5));
         final Button playPauseBtn = new Button("Play");
@@ -47,7 +47,7 @@ public class GameOfLife extends Application {
                     prevNanoTime = currentNanoTime;
                     game.updateStates();
                 }
-                game.drawGame(gc);
+                game.drawGame();
             }
             
         }.start();
@@ -93,7 +93,7 @@ public class GameOfLife extends Application {
                     refreshRate = Integer.parseInt(refreshRateTxtFld.getText());
                 } catch (NumberFormatException ex) {
                     System.err.println(ex.getMessage());
-                };
+                }
             }
             
         });
