@@ -1,6 +1,5 @@
 package gameoflife;
 
-import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -8,36 +7,17 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 public class GameOfLife extends Application {
-    private static boolean updateStates = false, example = false;
-    private static int refreshRate = 240;
     private static int width = 50, height = 50;
-    private static final int factor = 20;
-        
-    private static BorderPane root2;
-    private static Canvas gameDisplay;
-    private static GraphicsContext gc;
-    private static GameController game;
-    private static FlowPane toolbar;
-    private static Button playPauseBtn, clearBtn;
-    private static Label refreshRateLbl;
-    private static TextField refreshRateTxtFld;
-    private static Button refreshRateUpdateBtn;
-    private static CheckBox modeChkBx;
-    private static Scene scene2;
-    private static Stage secondaryStage;
+    private static boolean example = false;
     
     @Override
     public void start(final Stage primaryStage) {
@@ -87,108 +67,24 @@ public class GameOfLife extends Application {
 
             @Override
             public void handle(ActionEvent t) {
-                primaryStage.hide();
-                width = Integer.parseInt(widthTxtFld.getText());
-                height = Integer.parseInt(heightTxtFld.getText());
-                example = exampleChkBx.isSelected();
-                initialiseStage2();
-            }
-        
-        });
-        
-    }
-    
-    private static void initialiseStage2() {
-        root2 = new BorderPane();
-        gameDisplay = new Canvas(width * factor, height * factor);
-        gc = gameDisplay.getGraphicsContext2D();
-        game = new GameController(width, height, factor, gc, example);
-        toolbar = new FlowPane(5, 5);
-        toolbar.setPadding(new Insets(5));  
-        playPauseBtn = new Button("Play");
-        playPauseBtn.setPrefWidth(55);
-        clearBtn = new Button("Clear");
-        refreshRateLbl = new Label("Refresh rate (delay between frames in ms):");
-        refreshRateTxtFld = new TextField(String.valueOf(refreshRate));
-        refreshRateTxtFld.setPrefWidth(60);
-        refreshRateUpdateBtn = new Button("Update");
-        modeChkBx = new CheckBox("Wrap edges");
-        scene2 = new Scene(root2);
-        secondaryStage = new Stage();
-        
-        new AnimationTimer() {
-            
-            long prevNanoTime = System.nanoTime();
-            
-            @Override
-            public void handle(long currentNanoTime) {
-                if (modeChkBx.isSelected()) {
-                    game.setWrap(true);
-                } else {
-                    game.setWrap(false);
-                }
-                if (updateStates && currentNanoTime - prevNanoTime >= refreshRate * 1_000_000) {
-                    prevNanoTime = currentNanoTime;
-                    game.updateStates();
-                }
-                game.drawGame();
-            }
-            
-        }.start();
-        
-        gameDisplay.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-            @Override
-            public void handle(MouseEvent t) {
-                game.toggleCell((int) t.getX() / factor, (int) t.getY() / factor);
-            }
-            
-        });
-        
-        playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                if (updateStates) {
-                    updateStates = false;
-                    playPauseBtn.setText("Play");
-                } else {
-                    updateStates = true;
-                    playPauseBtn.setText("Pause");
-                }
-            }
-            
-        });
-        
-        clearBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                game.clear();
-            }
-            
-        });
-        
-        refreshRateUpdateBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
                 try {
-                    refreshRate = Integer.parseInt(refreshRateTxtFld.getText());
+                    width = Integer.parseInt(widthTxtFld.getText());
+                    height = Integer.parseInt(heightTxtFld.getText());
                 } catch (NumberFormatException ex) {
-                    System.err.println(ex.getMessage());
+                    new Dialog("That is not a valid number", "Invalid Number");
+                    return;
                 }
+                if (width < 20 || height < 20) {
+                    new Dialog("Minimum allowed size is 20 x 20", "Invalid Size");
+                    return;
+                }
+                primaryStage.hide();
+                example = exampleChkBx.isSelected();
+                new GameStage(width, height, example);
             }
-            
+        
         });
         
-        toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, modeChkBx);
-        root2.setBottom(gameDisplay);
-        root2.setTop(toolbar);
-        
-        secondaryStage.setTitle("Conway's Game of Life");
-        secondaryStage.setScene(scene2);
-        secondaryStage.show();
     }
 
     /**

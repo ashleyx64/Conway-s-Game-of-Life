@@ -42,7 +42,10 @@ public class GameController {
             String line = scanner.next();
             for (int j = 0; j < 13; j++) {
                 if (line.charAt(j) == 'X') {
-                    gameMap[i + startY][j + startX].setAlive(true);
+                    int x = j + startX, y = i + startY;
+                    if (x >= 0 && x < width && y >= 0 && y < height) {
+                        gameMap[y][x].setAlive(true);
+                    }
                 }
             }
         }
