@@ -7,7 +7,10 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -71,16 +74,16 @@ public class GameOfLife extends Application {
                     width = Integer.parseInt(widthTxtFld.getText());
                     height = Integer.parseInt(heightTxtFld.getText());
                 } catch (NumberFormatException ex) {
-                    new Dialog("That is not a valid number", "Invalid Number");
+                    new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
                     return;
                 }
                 if (width < 20 || height < 20) {
-                    new Dialog("Minimum allowed size is 20 x 20", "Invalid Size");
+                    new Alert(AlertType.WARNING, "Minimum allowed size is 20 x 20", ButtonType.OK).showAndWait();
                     return;
                 }
                 primaryStage.hide();
                 example = exampleChkBx.isSelected();
-                new GameStage(width, height, example);
+                new GameStage(width, height, example).show();
             }
         
         });

@@ -7,7 +7,10 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -107,7 +110,7 @@ public class GameStage extends Stage {
                 try {
                     refreshRate = Integer.parseInt(refreshRateTxtFld.getText());
                 } catch (NumberFormatException ex) {
-                    new Dialog("That is not a valid number", "Invalid Number");
+                    new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
                 }
             }
             
@@ -118,8 +121,7 @@ public class GameStage extends Stage {
         root2.setTop(toolbar);
         
         this.setTitle("Conway's Game of Life");
-        this.setScene(scene2);
-        this.show();        
+        this.setScene(scene2);     
     }
     
 }
