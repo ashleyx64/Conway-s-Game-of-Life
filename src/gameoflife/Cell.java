@@ -1,33 +1,18 @@
 package gameoflife;
 
 public class Cell {
-    private boolean alive, marked;
+    private int x, y;
     
-    public Cell() {
-        this(false);
+    public Cell(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
     
-    public Cell(boolean alive) {
-        this.alive = alive;
+    public int getX() {
+        return x;
     }
     
-    public boolean getAlive() {
-        return alive;
-    }
-    
-    public void setAlive(boolean alive) {
-        this.alive = alive;
-    }
-    
-    public void toggleAlive() {
-        alive = !alive;
-    }
-    
-    public boolean getMarked() {
-        return marked;
-    }
-    
-    public void setMarked(boolean marked) {
-        this.marked = marked;
+    public int getY() {
+        return y;
     }
 }

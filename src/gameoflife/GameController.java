@@ -2,6 +2,9 @@ package gameoflife;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,42 +13,35 @@ import javafx.scene.paint.Color;
 
 public class GameController {
     private final int width, height, factor;
-    private final Cell[][] gameMap;
+    private final List<Cell> cells = new ArrayList<>();
+    private final List<Integer[]> marks = new ArrayList<>(), checks = new ArrayList<>();
     private final GraphicsContext gc;
-    private boolean wrap;
+    private boolean wrap = false;
     
     public GameController(int width, int height, int factor, GraphicsContext gc, boolean example) {
         this.width = width;
         this.height = height;
         this.factor = factor;
         this.gc = gc;
-        gameMap = new Cell[height][width];
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                gameMap[i][j] = new Cell();
-            }
-        }
         if (example) {
             placeExample();
         }
     }
     
     private void placeExample() {
-        Scanner scanner = null;
+        Scanner scanner;
         try {
             scanner = new Scanner(new File("src\\gameoflife\\exampleTemplate.txt"));
         } catch (FileNotFoundException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+            return;
         }
         int startX = width / 2 - 7, startY = height / 2 - 7;
-        for (int i = 0; i < 13; i++) {
+        for (int y = 0; y < 13; y++) {
             String line = scanner.next();
-            for (int j = 0; j < 13; j++) {
-                if (line.charAt(j) == 'X') {
-                    int x = j + startX, y = i + startY;
-                    if (x >= 0 && x < width && y >= 0 && y < height) {
-                        gameMap[y][x].setAlive(true);
-                    }
+            for (int x = 0; x < 13; x++) {
+                if (line.charAt(x) == 'X') {
+                    cells.add(new Cell(x + startX, y + startY));
                 }
             }
         }
@@ -54,58 +50,77 @@ public class GameController {
     public void drawGame() {
         gc.setStroke(Color.SILVER);
         gc.setLineWidth(2);
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (gameMap[i][j].getAlive()) {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                Cell cell = getCell(x, y);
+                if (cell != null) {
                     gc.setFill(Color.BLACK);
                 } else {
                     gc.setFill(Color.WHITE);
                 }
-                gc.fillRect(j * factor, i * factor, factor, factor);
-                gc.strokeRect(j * factor, i * factor, factor, factor);
+                gc.fillRect(x * factor, y * factor, factor, factor);
+                gc.strokeRect(x * factor, y * factor, factor, factor);
             }
         }
+    }
+    
+    private Cell getCell(int x, int y) {
+        for (Cell cell : cells) {
+            if (cell.getX() == x && cell.getY() == y) {
+                return cell;
+            }
+        }
+        return null;
     }
     
     public void updateStates() {
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                int adjPop = getAdjPop(j, i);
-                if (gameMap[i][j].getAlive()) {
-                    if (adjPop < 2 || adjPop > 3) {
-                        gameMap[i][j].setMarked(true);
-                    }
-                } else {
-                    if (adjPop == 3) {
-                        gameMap[i][j].setMarked(true);
+        
+        for (Cell cell : cells) {
+            int x = cell.getX(), y = cell.getY();
+            for (int cx = x - 1; cx < x + 2; cx++) {
+                for (int cy = y - 1; cy < y + 2; cy++) {
+                    Integer[] coords = {cx, cy};
+                    if (!contains(checks, new Integer[] {cx, cy})) {
+                        checks.add(coords);
                     }
                 }
             }
         }
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (gameMap[i][j].getMarked()) {
-                    gameMap[i][j].toggleAlive();
-                    gameMap[i][j].setMarked(false);
+        
+        for (Integer[] coords : checks) {
+            int x = coords[0], y = coords[1];
+            Cell cell = getCell(x, y);
+            int adjCells = getAdjCells(x, y);
+            if (cell == null) {
+                if (adjCells == 3) {
+                    marks.add(new Integer[] {x, y});
+                }
+            } else {
+                if (adjCells < 2 || adjCells > 3) {
+                    marks.add(new Integer[] {x, y});
                 }
             }
+        }  
+        
+        for (Integer[] coords : marks) {
+            toggleCell(coords[0], coords[1]);
         }
+        
+        marks.clear();
     }
     
-    private int getAdjPop(int x, int y) {
+    private int getAdjCells(int x, int y) {
         int sum = 0;
-        for (int i = y - 1; i < y + 2; i++) {
-            for (int j = x - 1; j < x + 2; j++) {
-                if (!(i == y && j == x)) {
+        for (int cx = x - 1; cx < x + 2; cx++) {
+            for (int cy = y - 1; cy < y + 2; cy++) {
+                if (!(cx == x && cy == y)) {
                     if (wrap) {
-                        if (gameMap[getWrapped(i, height)][getWrapped(j, width)].getAlive()) {
+                        if (getCell(getWrapped(cx, width), getWrapped(cy, height)) != null) {
                             sum++;
                         }
                     } else {
-                        if (i >= 0 && i < height && j >= 0 && j < width) {
-                            if (gameMap[i][j].getAlive()) {
-                                sum++;
-                            }
+                        if (getCell(cx, cy) != null) {
+                            sum++;
                         }
                     }
                 }
@@ -125,18 +140,28 @@ public class GameController {
     }
     
     public void toggleCell(int x, int y) {
-        gameMap[y][x].toggleAlive();
-    }
-    
-    public void clear() {
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                gameMap[i][j].setAlive(false);
-            }
+        Cell cell = getCell(x, y);
+        if (cell == null) {
+            cells.add(new Cell(x, y));
+        } else {
+            cells.remove(cell);
         }
     }
     
-    public void setWrap(boolean wrap) {
-        this.wrap = wrap;
+    private boolean contains(List<Integer[]> list, Integer[] elem) {
+        for (Integer[] listElem : list) {
+            if (Arrays.equals(listElem, elem)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public void clear() {
+        cells.clear();
+    }
+
+    public void toggleWrapped() {
+        wrap = !wrap;
     }
 }

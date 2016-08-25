@@ -34,7 +34,7 @@ public class GameStage extends Stage {
     private final Label refreshRateLbl = new Label("Refresh rate (delay between frames in ms):");
     private TextField refreshRateTxtFld;
     private final Button refreshRateUpdateBtn = new Button("Update");
-    private CheckBox modeChkBx = new CheckBox("Wrap edges");
+    private final CheckBox modeChkBx = new CheckBox("Wrap edges");
     private final Scene scene2 = new Scene(root2);
     
     private boolean updateStates = false;
@@ -56,11 +56,6 @@ public class GameStage extends Stage {
             
             @Override
             public void handle(long currentNanoTime) {
-                if (modeChkBx.isSelected()) {
-                    game.setWrap(true);
-                } else {
-                    game.setWrap(false);
-                }
                 if (updateStates && currentNanoTime - prevNanoTime >= refreshRate * 1_000_000) {
                     prevNanoTime = currentNanoTime;
                     game.updateStates();
@@ -112,6 +107,15 @@ public class GameStage extends Stage {
                 } catch (NumberFormatException ex) {
                     new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
                 }
+            }
+            
+        });
+        
+        modeChkBx.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                game.toggleWrapped();
             }
             
         });
