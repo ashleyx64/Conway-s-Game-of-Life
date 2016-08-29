@@ -13,6 +13,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -23,7 +24,7 @@ import javafx.stage.Stage;
  * @author Ashley Allen
  */
 public class GameStage extends Stage {
-    private final BorderPane root2 = new BorderPane();;
+    private final BorderPane root = new BorderPane();;
     private final Canvas gameDisplay;
     private final GraphicsContext gc;
     private GameController game;
@@ -34,7 +35,7 @@ public class GameStage extends Stage {
     private TextField refreshRateTxtFld;
     private final Button refreshRateUpdateBtn = new Button("Update");
     private final CheckBox modeChkBx = new CheckBox("Wrap edges");
-    private final Scene scene2 = new Scene(root2);
+    private final Scene scene = new Scene(root);
     
     private boolean updateStates = false;
     private int refreshRate = 240;
@@ -77,10 +78,10 @@ public class GameStage extends Stage {
         });
         
         modeChkBx.setOnAction((ActionEvent t) -> game.toggleWrapped());        
-        
+
         new AnimationTimer() {
             
-            long prevNanoTime = System.nanoTime();
+            long prevNanoTime = System.nanoTime();            
             
             @Override
             public void handle(long currentNanoTime) {
@@ -93,12 +94,20 @@ public class GameStage extends Stage {
             
         }.start();
         
+        scene.setOnKeyPressed((KeyEvent t) -> {
+            game.moveGameArea(t.getCode());
+        });
+        
         toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, modeChkBx);
-        root2.setBottom(gameDisplay);
-        root2.setTop(toolbar);
+        toolbar.getChildren().stream().forEach((node) -> {
+            node.setFocusTraversable(false);
+        });
+        
+        root.setBottom(gameDisplay);
+        root.setTop(toolbar);
         
         this.setTitle("Conway's Game of Life");
-        this.setScene(scene2);     
+        this.setScene(scene);     
     }
     
 }

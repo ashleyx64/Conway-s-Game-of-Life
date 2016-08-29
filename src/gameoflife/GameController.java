@@ -9,6 +9,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
 public class GameController {
@@ -158,5 +159,30 @@ public class GameController {
 
     public void toggleWrapped() {
         wrap = !wrap;
+    }
+    
+    public void moveGameArea(KeyCode k) {
+        switch (k) {
+            case UP:
+                cells.stream().forEach((cell) -> {
+                    cell.setY(cell.getY() + 1);
+                });
+                break;
+            case DOWN:
+                cells.stream().forEach((cell) -> {
+                    cell.setY(cell.getY() - 1);
+                });
+                break;
+            case RIGHT:
+                cells.stream().forEach((cell) -> {
+                    cell.setX(cell.getX() - 1);
+                });
+                break;
+            case LEFT:
+                cells.stream().forEach((cell) -> {
+                    cell.setX(cell.getX() + 1);
+                });
+                break;
+        }
     }
 }
