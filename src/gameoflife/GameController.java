@@ -13,17 +13,22 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
 public class GameController {
-    private final int width, height, factor;
+    private int gridWidth, gridHeight;
+    private final double gameWidth, gameHeight;
+    private double hFactor, vFactor;
     private final List<Cell> cells = new ArrayList<>();
     private final List<Integer[]> marks = new ArrayList<>(), checks = new ArrayList<>();
     private final GraphicsContext gc;
     private boolean wrap = false;
     
-    public GameController(int width, int height, int factor, GraphicsContext gc, boolean example) {
-        this.width = width;
-        this.height = height;
-        this.factor = factor;
+    public GameController(int gridWidth, int gridHeight, double gameWidth, double gameHeight, GraphicsContext gc, boolean example) {
+        this.gridWidth = gridWidth;
+        this.gridHeight = gridHeight;
+        this.gameWidth = gameWidth;
+        this.gameHeight = gameHeight;
         this.gc = gc;
+        hFactor = gameWidth / gridWidth;
+        vFactor = gameHeight / gridHeight;
         if (example) {
             placeExample();
         }
@@ -37,7 +42,7 @@ public class GameController {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
-        int startX = width / 2 - 7, startY = height / 2 - 7;
+        int startX = gridWidth / 2 - 7, startY = gridHeight / 2 - 7;
         for (int y = 0; y < 13; y++) {
             String line = scanner.next();
             for (int x = 0; x < 13; x++) {
@@ -51,16 +56,16 @@ public class GameController {
     public void drawGame() {
         gc.setStroke(Color.SILVER);
         gc.setLineWidth(2);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
+        for (int x = 0; x < gridWidth; x++) {
+            for (int y = 0; y < gridHeight; y++) {
                 Cell cell = getCell(x, y);
                 if (cell != null) {
                     gc.setFill(Color.BLACK);
                 } else {
                     gc.setFill(Color.WHITE);
                 }
-                gc.fillRect(x * factor, y * factor, factor, factor);
-                gc.strokeRect(x * factor, y * factor, factor, factor);
+                gc.fillRect(x * hFactor, y * vFactor, hFactor, vFactor);
+                gc.strokeRect(x * hFactor, y * vFactor, hFactor, vFactor);
             }
         }
     }
@@ -116,7 +121,7 @@ public class GameController {
             for (int cy = y - 1; cy < y + 2; cy++) {
                 if (!(cx == x && cy == y)) {
                     if (wrap) {
-                        if (getCell(getWrapped(cx, width), getWrapped(cy, height)) != null) {
+                        if (getCell(getWrapped(cx, gridWidth), getWrapped(cy, gridHeight)) != null) {
                             sum++;
                         }
                     } else {
@@ -147,6 +152,14 @@ public class GameController {
         } else {
             cells.remove(cell);
         }
+    }
+    
+    public int convertX(double x) {
+        return (int) (x / hFactor);
+    }
+    
+    public int convertY(double y) {
+        return (int) (y / vFactor);
     }
     
     private boolean contains(List<Integer[]> list, Integer[] elem) {
@@ -184,5 +197,17 @@ public class GameController {
                 });
                 break;
         }
+    }
+    
+    public void changeZoom(boolean increase) {
+        if (increase) {
+            gridWidth++;
+            gridHeight++;
+        } else {
+            gridWidth--;
+            gridHeight--;
+        }
+        hFactor = gameWidth / gridWidth;
+        vFactor = gameHeight / gridHeight;
     }
 }

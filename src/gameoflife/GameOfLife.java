@@ -18,7 +18,8 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 public class GameOfLife extends Application {
-    private static int width = 50, height = 50;
+    private static int gridWidth = 50, gridHeight = 50;
+    private static double gameWidth = 1000, gameHeight = 1000;
     private static boolean example = false;
     
     @Override
@@ -35,12 +36,12 @@ public class GameOfLife extends Application {
         options.setVgap(5);
         final Label widthLbl = new Label("Width:");
         
-        final TextField widthTxtFld = new TextField(String.valueOf(width));
+        final TextField widthTxtFld = new TextField(String.valueOf(gridWidth));
         widthTxtFld.setPrefWidth(40);
         
         final Label heightLbl = new Label("Height:");
         
-        final TextField heightTxtFld = new TextField(String.valueOf(height));
+        final TextField heightTxtFld = new TextField(String.valueOf(gridHeight));
         heightTxtFld.setPrefWidth(40);
         
         final CheckBox exampleChkBx = new CheckBox("Generate example");
@@ -67,19 +68,19 @@ public class GameOfLife extends Application {
         
         confirmBtn.setOnAction((ActionEvent t) -> {
             try {
-                width = Integer.parseInt(widthTxtFld.getText());
-                height = Integer.parseInt(heightTxtFld.getText());
+                gridWidth = Integer.parseInt(widthTxtFld.getText());
+                gridHeight = Integer.parseInt(heightTxtFld.getText());
             } catch (NumberFormatException ex) {
                 new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
                 return;
             }
-            if (width < 20 || height < 20) {
+            if (gridWidth < 20 || gridHeight < 20) {
                 new Alert(AlertType.WARNING, "Minimum allowed size is 20 x 20", ButtonType.OK).showAndWait();
                 return;
             }
             primaryStage.hide();
             example = exampleChkBx.isSelected();
-            new GameStage(width, height, example).show();            
+            new GameStage(gridWidth, gridHeight, gameWidth, gameHeight, example).show();            
         });
         
     }

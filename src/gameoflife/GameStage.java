@@ -15,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
@@ -39,17 +40,17 @@ public class GameStage extends Stage {
     
     private boolean updateStates = false;
     private int refreshRate = 240;
-    private final int factor = 20;
     
-    public GameStage(int width, int height, boolean example) {
-        gameDisplay = new Canvas(width * factor, height * factor);
+    public GameStage(int gridWidth, int gridHeight, double gameWidth, double gameHeight, boolean example) {
+        gameDisplay = new Canvas(gameWidth, gameHeight);
+        gameDisplay.setFocusTraversable(true);
         gameDisplay.setOnMouseClicked((MouseEvent t) -> {
-            game.toggleCell((int) t.getX() / factor, (int) t.getY() / factor);
+            game.toggleCell(game.convertX(t.getX()), game.convertY(t.getY()));
         });
         
         gc = gameDisplay.getGraphicsContext2D();
         
-        game = new GameController(width, height, factor, gc, example);
+        game = new GameController(gridWidth, gridHeight, gameWidth, gameHeight, gc, example);
         
         toolbar.setPadding(new Insets(5));
         
@@ -96,6 +97,10 @@ public class GameStage extends Stage {
         
         scene.setOnKeyPressed((KeyEvent t) -> {
             game.moveGameArea(t.getCode());
+        });
+        
+        scene.setOnScroll((ScrollEvent t) -> {
+            game.changeZoom(t.getDeltaY() < 0);
         });
         
         toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, modeChkBx);
