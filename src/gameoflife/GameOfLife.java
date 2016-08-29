@@ -2,7 +2,6 @@ package gameoflife;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -66,26 +65,21 @@ public class GameOfLife extends Application {
         primaryStage.setScene(scene1);
         primaryStage.show();
         
-        confirmBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                try {
-                    width = Integer.parseInt(widthTxtFld.getText());
-                    height = Integer.parseInt(heightTxtFld.getText());
-                } catch (NumberFormatException ex) {
-                    new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
-                    return;
-                }
-                if (width < 20 || height < 20) {
-                    new Alert(AlertType.WARNING, "Minimum allowed size is 20 x 20", ButtonType.OK).showAndWait();
-                    return;
-                }
-                primaryStage.hide();
-                example = exampleChkBx.isSelected();
-                new GameStage(width, height, example).show();
+        confirmBtn.setOnAction((ActionEvent t) -> {
+            try {
+                width = Integer.parseInt(widthTxtFld.getText());
+                height = Integer.parseInt(heightTxtFld.getText());
+            } catch (NumberFormatException ex) {
+                new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
+                return;
             }
-        
+            if (width < 20 || height < 20) {
+                new Alert(AlertType.WARNING, "Minimum allowed size is 20 x 20", ButtonType.OK).showAndWait();
+                return;
+            }
+            primaryStage.hide();
+            example = exampleChkBx.isSelected();
+            new GameStage(width, height, example).show();            
         });
         
     }

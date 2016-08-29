@@ -75,7 +75,7 @@ public class GameController {
     
     public void updateStates() {
         
-        for (Cell cell : cells) {
+        cells.stream().forEach((cell) -> {
             int x = cell.getX(), y = cell.getY();
             for (int cx = x - 1; cx < x + 2; cx++) {
                 for (int cy = y - 1; cy < y + 2; cy++) {
@@ -85,9 +85,9 @@ public class GameController {
                     }
                 }
             }
-        }
+        });
         
-        for (Integer[] coords : checks) {
+        checks.stream().forEach((coords) -> {
             int x = coords[0], y = coords[1];
             Cell cell = getCell(x, y);
             int adjCells = getAdjCells(x, y);
@@ -100,11 +100,11 @@ public class GameController {
                     marks.add(new Integer[] {x, y});
                 }
             }
-        }  
+        });  
         
-        for (Integer[] coords : marks) {
+        marks.stream().forEach((coords) -> {
             toggleCell(coords[0], coords[1]);
-        }
+        });
         
         marks.clear();
     }
@@ -149,12 +149,7 @@ public class GameController {
     }
     
     private boolean contains(List<Integer[]> list, Integer[] elem) {
-        for (Integer[] listElem : list) {
-            if (Arrays.equals(listElem, elem)) {
-                return true;
-            }
-        }
-        return false;
+        return list.stream().anyMatch((listElem) -> (Arrays.equals(listElem, elem)));
     }
     
     public void clear() {

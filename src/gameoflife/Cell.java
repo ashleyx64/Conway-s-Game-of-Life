@@ -1,7 +1,7 @@
 package gameoflife;
 
 public class Cell {
-    private int x, y;
+    private final int x, y;
     
     public Cell(int x, int y) {
         this.x = x;

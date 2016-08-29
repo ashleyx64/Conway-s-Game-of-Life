@@ -2,7 +2,6 @@ package gameoflife;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -43,12 +42,41 @@ public class GameStage extends Stage {
     
     public GameStage(int width, int height, boolean example) {
         gameDisplay = new Canvas(width * factor, height * factor);
+        gameDisplay.setOnMouseClicked((MouseEvent t) -> {
+            game.toggleCell((int) t.getX() / factor, (int) t.getY() / factor);
+        });
+        
         gc = gameDisplay.getGraphicsContext2D();
+        
         game = new GameController(width, height, factor, gc, example);
+        
         toolbar.setPadding(new Insets(5));
+        
         playPauseBtn.setPrefWidth(55);
+        playPauseBtn.setOnAction((ActionEvent t) -> {
+            if (updateStates) {
+                updateStates = false;
+                playPauseBtn.setText("Play");
+            } else {
+                updateStates = true;
+                playPauseBtn.setText("Pause");
+            }
+        });
+        
+        clearBtn.setOnAction((ActionEvent t) -> game.clear());        
+        
         refreshRateTxtFld = new TextField(String.valueOf(refreshRate));
         refreshRateTxtFld.setPrefWidth(40);
+        
+        refreshRateUpdateBtn.setOnAction((ActionEvent t) -> {
+            try {
+                refreshRate = Integer.parseInt(refreshRateTxtFld.getText());
+            } catch (NumberFormatException ex) {
+                new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
+            }
+        });
+        
+        modeChkBx.setOnAction((ActionEvent t) -> game.toggleWrapped());        
         
         new AnimationTimer() {
             
@@ -64,61 +92,6 @@ public class GameStage extends Stage {
             }
             
         }.start();
-        
-        gameDisplay.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-            @Override
-            public void handle(MouseEvent t) {
-                game.toggleCell((int) t.getX() / factor, (int) t.getY() / factor);
-            }
-            
-        });
-        
-        playPauseBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                if (updateStates) {
-                    updateStates = false;
-                    playPauseBtn.setText("Play");
-                } else {
-                    updateStates = true;
-                    playPauseBtn.setText("Pause");
-                }
-            }
-            
-        });
-        
-        clearBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                game.clear();
-            }
-            
-        });
-        
-        refreshRateUpdateBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                try {
-                    refreshRate = Integer.parseInt(refreshRateTxtFld.getText());
-                } catch (NumberFormatException ex) {
-                    new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
-                }
-            }
-            
-        });
-        
-        modeChkBx.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                game.toggleWrapped();
-            }
-            
-        });
         
         toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, modeChkBx);
         root2.setBottom(gameDisplay);
