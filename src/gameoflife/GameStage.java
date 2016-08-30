@@ -38,6 +38,7 @@ public class GameStage extends Stage {
     private final Button refreshRateUpdateBtn = new Button("Update");
     private final Label fpsLbl = new Label("FPS: 0");
     private final Label timeLbl = new Label("Time: 0");
+    private final Label cellsLbl = new Label("Cells: 0");
     private final Scene scene = new Scene(root);
     
     private boolean updateStates = false, skipFrame = false;
@@ -115,7 +116,9 @@ public class GameStage extends Stage {
                     frameNanoTime = currentNanoTime;
                 }
                 
-                timeLbl.setText("Time: " + String.valueOf(timeCounter));                
+                timeLbl.setText("Time: " + String.valueOf(timeCounter));
+                
+                cellsLbl.setText("Cells: " + game.getNumCells());
                 
                 game.drawGame();
             }
@@ -130,7 +133,7 @@ public class GameStage extends Stage {
             game.changeZoom(t.getDeltaY() < 0);
         });
         
-        toolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, fpsLbl, timeLbl);
+        toolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, fpsLbl, timeLbl, cellsLbl);
         toolbar.getChildren().stream().forEach((node) -> {
             node.setFocusTraversable(false);
         });

@@ -186,11 +186,15 @@ public class GameController {
     
     public void changeZoom(boolean increase) {
         if (increase) {
-            gridWidth++;
-            gridHeight++;
+            if (gridWidth < 100 && gridHeight < 100) {
+                gridWidth++;
+                gridHeight++;
+            }
         } else {
-            gridWidth--;
-            gridHeight--;
+            if (gridWidth > 5 && gridHeight > 5) {
+                gridWidth--;
+                gridHeight--;
+            }
         }
         hFactor = gameWidth / gridWidth;
         vFactor = gameHeight / gridHeight;
@@ -198,5 +202,9 @@ public class GameController {
     
     public static String getHashKey(int x, int y) {
         return "" + x + "_" + y;
+    }
+    
+    public int getNumCells() {
+        return cells.size();
     }
 }
