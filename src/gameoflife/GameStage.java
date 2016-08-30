@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -31,9 +32,10 @@ public class GameStage extends Stage {
     private final FlowPane toolbar = new FlowPane(5, 5);;
     private Button playPauseBtn = new Button("Play");
     private final Button clearBtn = new Button("Clear");
-    private final Label refreshRateLbl = new Label("Refresh rate (delay between frames in ms):");
+    private final Label refreshRateLbl = new Label("Refresh rate:");
     private TextField refreshRateTxtFld;
     private final Button refreshRateUpdateBtn = new Button("Update");
+    private final Label fpsLbl = new Label("FPS:");
     private final Scene scene = new Scene(root);
     
     private boolean updateStates = false;
@@ -66,7 +68,8 @@ public class GameStage extends Stage {
         clearBtn.setOnAction((ActionEvent t) -> game.clear());        
         
         refreshRateTxtFld = new TextField(String.valueOf(refreshRate));
-        refreshRateTxtFld.setPrefWidth(40);
+        refreshRateTxtFld.setPrefWidth(50);
+        refreshRateTxtFld.setTooltip(new Tooltip("Delay between frames in ms"));
         
         refreshRateUpdateBtn.setOnAction((ActionEvent t) -> {
             try {
@@ -79,15 +82,25 @@ public class GameStage extends Stage {
         
         new AnimationTimer() {
             
-            long prevNanoTime = System.nanoTime();            
+            long prevNanoTime = System.nanoTime();
+            long frameNanoTime = System.nanoTime();
+            long counter = 0;
             
             @Override
             public void handle(long currentNanoTime) {
                 if (updateStates && currentNanoTime - prevNanoTime >= refreshRate * 1_000_000) {
-                    prevNanoTime = currentNanoTime;
                     game.updateStates();
+                    counter++;
+                    prevNanoTime = currentNanoTime;                    
                 }
+                
                 game.drawGame();
+                
+                if (currentNanoTime - frameNanoTime >= 1_000_000_000) {
+                    fpsLbl.setText("FPS: " + String.valueOf(counter));
+                    counter = 0;
+                    frameNanoTime = currentNanoTime;
+                }
             }
             
         }.start();
@@ -100,7 +113,7 @@ public class GameStage extends Stage {
             game.changeZoom(t.getDeltaY() < 0);
         });
         
-        toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn);
+        toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, fpsLbl);
         toolbar.getChildren().stream().forEach((node) -> {
             node.setFocusTraversable(false);
         });
