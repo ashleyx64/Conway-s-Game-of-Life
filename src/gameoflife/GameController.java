@@ -19,7 +19,6 @@ public class GameController {
     private final List<Cell> cells = new ArrayList<>();
     private final List<Integer[]> marks = new ArrayList<>(), checks = new ArrayList<>();
     private final GraphicsContext gc;
-    private boolean wrap = false;
     
     public GameController(int gridWidth, int gridHeight, double gameWidth, double gameHeight, GraphicsContext gc, boolean example) {
         this.gridWidth = gridWidth;
@@ -120,29 +119,13 @@ public class GameController {
         for (int cx = x - 1; cx < x + 2; cx++) {
             for (int cy = y - 1; cy < y + 2; cy++) {
                 if (!(cx == x && cy == y)) {
-                    if (wrap) {
-                        if (getCell(getWrapped(cx, gridWidth), getWrapped(cy, gridHeight)) != null) {
-                            sum++;
-                        }
-                    } else {
-                        if (getCell(cx, cy) != null) {
-                            sum++;
-                        }
+                    if (getCell(cx, cy) != null) {
+                        sum++;
                     }
                 }
             }
         }
         return sum;
-    }
-    
-    private int getWrapped(int c, int len) {
-        if (c < 0) {
-            return c + len;
-        } else if (c >= len) {
-            return c - len;
-        } else {
-            return c;
-        }
     }
     
     public void toggleCell(int x, int y) {
@@ -168,10 +151,6 @@ public class GameController {
     
     public void clear() {
         cells.clear();
-    }
-
-    public void toggleWrapped() {
-        wrap = !wrap;
     }
     
     public void moveGameArea(KeyCode k) {

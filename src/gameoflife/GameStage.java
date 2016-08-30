@@ -10,7 +10,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -35,7 +34,6 @@ public class GameStage extends Stage {
     private final Label refreshRateLbl = new Label("Refresh rate (delay between frames in ms):");
     private TextField refreshRateTxtFld;
     private final Button refreshRateUpdateBtn = new Button("Update");
-    private final CheckBox modeChkBx = new CheckBox("Wrap edges");
     private final Scene scene = new Scene(root);
     
     private boolean updateStates = false;
@@ -76,10 +74,9 @@ public class GameStage extends Stage {
             } catch (NumberFormatException ex) {
                 new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
             }
+            gameDisplay.requestFocus();
         });
         
-        modeChkBx.setOnAction((ActionEvent t) -> game.toggleWrapped());        
-
         new AnimationTimer() {
             
             long prevNanoTime = System.nanoTime();            
@@ -103,7 +100,7 @@ public class GameStage extends Stage {
             game.changeZoom(t.getDeltaY() < 0);
         });
         
-        toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, modeChkBx);
+        toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn);
         toolbar.getChildren().stream().forEach((node) -> {
             node.setFocusTraversable(false);
         });
