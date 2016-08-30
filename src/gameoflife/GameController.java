@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,15 +18,15 @@ public class GameController {
     private int gridWidth, gridHeight;
     private final double gameWidth, gameHeight;
     private double hFactor, vFactor;
-    private final List<Cell> cells = new ArrayList<>();
+    private final Map<String, Cell> cells = new HashMap<>();
     private final List<Integer[]> marks = new ArrayList<>(), checks = new ArrayList<>();
     private final GraphicsContext gc;
     
-    public GameController(int gridWidth, int gridHeight, double gameWidth, double gameHeight, GraphicsContext gc, boolean example) {
+    public GameController(int gridWidth, int gridHeight, GraphicsContext gc, boolean example) {
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
-        this.gameWidth = gameWidth;
-        this.gameHeight = gameHeight;
+        gameWidth = gc.getCanvas().getWidth();
+        gameHeight = gc.getCanvas().getHeight();
         this.gc = gc;
         hFactor = gameWidth / gridWidth;
         vFactor = gameHeight / gridHeight;
@@ -34,6 +36,8 @@ public class GameController {
     }
     
     private void placeExample() {
+        //Reads an example machine from exampleTemplate.txt and then writes it
+        //to the game
         Scanner scanner;
         try {
             scanner = new Scanner(new File("src\\gameoflife\\exampleTemplate.txt"));
@@ -46,19 +50,21 @@ public class GameController {
             String line = scanner.next();
             for (int x = 0; x < 13; x++) {
                 if (line.charAt(x) == 'X') {
-                    cells.add(new Cell(x + startX, y + startY));
+                    int cx = x + startX, cy = y + startY;
+                    cells.put(getHashKey(cx, cy), new Cell(cx, cy));
                 }
             }
         }
     }
     
     public void drawGame() {
+        //For the size of the grid determine whether there is a cell at each
+        //coordinate and draw the corresponding colour
         gc.setStroke(Color.SILVER);
         gc.setLineWidth(2);
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
-                Cell cell = getCell(x, y);
-                if (cell != null) {
+                if (cells.containsKey(getHashKey(x, y))) {
                     gc.setFill(Color.BLACK);
                 } else {
                     gc.setFill(Color.WHITE);
@@ -69,49 +75,53 @@ public class GameController {
         }
     }
     
-    private Cell getCell(int x, int y) {
-        for (Cell cell : cells) {
-            if (cell.getX() == x && cell.getY() == y) {
-                return cell;
-            }
-        }
-        return null;
-    }
-    
     public void updateStates() {
-        
-        cells.stream().forEach((cell) -> {
+        //Add all alive cells and their surrounding cells to a check list
+        cells.entrySet().stream().forEach((entry) -> {
+            Cell cell = entry.getValue();
             int x = cell.getX(), y = cell.getY();
             for (int cx = x - 1; cx < x + 2; cx++) {
                 for (int cy = y - 1; cy < y + 2; cy++) {
                     Integer[] coords = {cx, cy};
-                    if (!contains(checks, new Integer[] {cx, cy})) {
+                    if (!contains(checks, coords)) {
                         checks.add(coords);
                     }
                 }
             }
         });
         
+//        checks.stream().forEach((coords) -> System.out.print("[" + coords[0] + ", " + coords[1] + "]"));
+        
+        //For each pair of coordinate in checks compute whether the state
+        //of the cell at those coordinates should be toggled or not and mark
+        //those coordinates if so
         checks.stream().forEach((coords) -> {
             int x = coords[0], y = coords[1];
-            Cell cell = getCell(x, y);
+            String hashKey = getHashKey(x, y);
             int adjCells = getAdjCells(x, y);
-            if (cell == null) {
-                if (adjCells == 3) {
-                    marks.add(new Integer[] {x, y});
-                }
-            } else {
+//            System.out.println("Cell at " + x + ", " + y + " has " + adjCells + " adjacent cells");
+            if (cells.containsKey(hashKey)) {
                 if (adjCells < 2 || adjCells > 3) {
-                    marks.add(new Integer[] {x, y});
+                    marks.add(coords);
+                }                
+            } else {
+                if (adjCells == 3) {
+                    marks.add(coords);
                 }
             }
-        });  
+        });
+        checks.clear();
         
+        //For each pair of coordinates in marks toggle the cell at those
+        //coordinates
         marks.stream().forEach((coords) -> {
             toggleCell(coords[0], coords[1]);
         });
-        
         marks.clear();
+    }
+    
+    private boolean contains(List<Integer[]> list, Integer[] elem) {
+        return list.stream().anyMatch((listElem) -> Arrays.equals(listElem, elem));
     }
     
     private int getAdjCells(int x, int y) {
@@ -119,7 +129,7 @@ public class GameController {
         for (int cx = x - 1; cx < x + 2; cx++) {
             for (int cy = y - 1; cy < y + 2; cy++) {
                 if (!(cx == x && cy == y)) {
-                    if (getCell(cx, cy) != null) {
+                    if (cells.containsKey(getHashKey(cx, cy))) {
                         sum++;
                     }
                 }
@@ -129,11 +139,11 @@ public class GameController {
     }
     
     public void toggleCell(int x, int y) {
-        Cell cell = getCell(x, y);
-        if (cell == null) {
-            cells.add(new Cell(x, y));
+        String hashKey = getHashKey(x, y);
+        if (cells.containsKey(hashKey)) {
+            cells.remove(hashKey);
         } else {
-            cells.remove(cell);
+            cells.put(hashKey, new Cell(x, y));
         }
     }
     
@@ -145,38 +155,34 @@ public class GameController {
         return (int) (y / vFactor);
     }
     
-    private boolean contains(List<Integer[]> list, Integer[] elem) {
-        return list.stream().anyMatch((listElem) -> (Arrays.equals(listElem, elem)));
-    }
-    
     public void clear() {
         cells.clear();
     }
     
-    public void moveGameArea(KeyCode k) {
-        switch (k) {
-            case UP:
-                cells.stream().forEach((cell) -> {
-                    cell.setY(cell.getY() + 1);
-                });
-                break;
-            case DOWN:
-                cells.stream().forEach((cell) -> {
-                    cell.setY(cell.getY() - 1);
-                });
-                break;
-            case RIGHT:
-                cells.stream().forEach((cell) -> {
-                    cell.setX(cell.getX() - 1);
-                });
-                break;
-            case LEFT:
-                cells.stream().forEach((cell) -> {
-                    cell.setX(cell.getX() + 1);
-                });
-                break;
-        }
-    }
+//    public void moveGameArea(KeyCode k) {
+//        switch (k) {
+//            case UP:
+//                cells.stream().forEach((cell) -> {
+//                    cell.setY(cell.getY() + 1);
+//                });
+//                break;
+//            case DOWN:
+//                cells.stream().forEach((cell) -> {
+//                    cell.setY(cell.getY() - 1);
+//                });
+//                break;
+//            case RIGHT:
+//                cells.stream().forEach((cell) -> {
+//                    cell.setX(cell.getX() - 1);
+//                });
+//                break;
+//            case LEFT:
+//                cells.stream().forEach((cell) -> {
+//                    cell.setX(cell.getX() + 1);
+//                });
+//                break;
+//        }
+//    }
     
     public void changeZoom(boolean increase) {
         if (increase) {
@@ -188,5 +194,9 @@ public class GameController {
         }
         hFactor = gameWidth / gridWidth;
         vFactor = gameHeight / gridHeight;
+    }
+    
+    public static String getHashKey(int x, int y) {
+        return "" + x + "_" + y;
     }
 }

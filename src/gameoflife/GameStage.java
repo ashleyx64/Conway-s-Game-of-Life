@@ -28,29 +28,35 @@ public class GameStage extends Stage {
     private final BorderPane root = new BorderPane();;
     private final Canvas gameDisplay;
     private final GraphicsContext gc;
-    private GameController game;
+    private final GameController game;
     private final FlowPane toolbar = new FlowPane(5, 5);;
-    private Button playPauseBtn = new Button("Play");
-    private final Button clearBtn = new Button("Clear");
+    private final Button playPauseBtn = new Button("Play");
+    private final Button skipFrameBtn = new Button("Skip Frame");
+    private final Button resetBtn = new Button("Reset");
     private final Label refreshRateLbl = new Label("Refresh rate:");
-    private TextField refreshRateTxtFld;
+    private final TextField refreshRateTxtFld;
     private final Button refreshRateUpdateBtn = new Button("Update");
-    private final Label fpsLbl = new Label("FPS:");
+    private final Label fpsLbl = new Label("FPS: 0");
+    private final Label timeLbl = new Label("Time: 0");
     private final Scene scene = new Scene(root);
     
-    private boolean updateStates = false;
+    private boolean updateStates = false, skipFrame = false;
     private int refreshRate = 240;
+    private long timeCounter = 0;
     
     public GameStage(int gridWidth, int gridHeight, double gameWidth, double gameHeight, boolean example) {
+ 
+        
         gameDisplay = new Canvas(gameWidth, gameHeight);
         gameDisplay.setFocusTraversable(true);
-        gameDisplay.setOnMouseClicked((MouseEvent t) -> {
-            game.toggleCell(game.convertX(t.getX()), game.convertY(t.getY()));
-        });
         
         gc = gameDisplay.getGraphicsContext2D();
         
-        game = new GameController(gridWidth, gridHeight, gameWidth, gameHeight, gc, example);
+        game = new GameController(gridWidth, gridHeight, gc, example);         
+        
+        gameDisplay.setOnMouseClicked((MouseEvent t) -> {
+            game.toggleCell(game.convertX(t.getX()), game.convertY(t.getY()));
+        });        
         
         toolbar.setPadding(new Insets(5));
         
@@ -65,7 +71,14 @@ public class GameStage extends Stage {
             }
         });
         
-        clearBtn.setOnAction((ActionEvent t) -> game.clear());        
+        skipFrameBtn.setOnAction((ActionEvent t) -> skipFrame = true);
+        
+        resetBtn.setOnAction((ActionEvent t) -> {
+            game.clear();
+            timeCounter = 0;
+            updateStates = false;
+            playPauseBtn.setText("Play");
+        });        
         
         refreshRateTxtFld = new TextField(String.valueOf(refreshRate));
         refreshRateTxtFld.setPrefWidth(50);
@@ -84,36 +97,40 @@ public class GameStage extends Stage {
             
             long prevNanoTime = System.nanoTime();
             long frameNanoTime = System.nanoTime();
-            long counter = 0;
+            long frameCounter = 0;
             
             @Override
             public void handle(long currentNanoTime) {
-                if (updateStates && currentNanoTime - prevNanoTime >= refreshRate * 1_000_000) {
+                if (updateStates && currentNanoTime - prevNanoTime >= refreshRate * 1_000_000 || skipFrame) {
                     game.updateStates();
-                    counter++;
+                    frameCounter++;
+                    timeCounter++;
+                    skipFrame = false;
                     prevNanoTime = currentNanoTime;                    
                 }
                 
-                game.drawGame();
-                
                 if (currentNanoTime - frameNanoTime >= 1_000_000_000) {
-                    fpsLbl.setText("FPS: " + String.valueOf(counter));
-                    counter = 0;
+                    fpsLbl.setText("FPS: " + String.valueOf(frameCounter));                    
+                    frameCounter = 0;
                     frameNanoTime = currentNanoTime;
                 }
+                
+                timeLbl.setText("Time: " + String.valueOf(timeCounter));                
+                
+                game.drawGame();
             }
             
         }.start();
         
-        scene.setOnKeyPressed((KeyEvent t) -> {
-            game.moveGameArea(t.getCode());
-        });
+//        scene.setOnKeyPressed((KeyEvent t) -> {
+//            game.moveGameArea(t.getCode());
+//        });
         
         scene.setOnScroll((ScrollEvent t) -> {
             game.changeZoom(t.getDeltaY() < 0);
         });
         
-        toolbar.getChildren().addAll(playPauseBtn, clearBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, fpsLbl);
+        toolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, fpsLbl, timeLbl);
         toolbar.getChildren().stream().forEach((node) -> {
             node.setFocusTraversable(false);
         });
