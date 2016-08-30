@@ -11,6 +11,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
+/**
+ * Main class
+ * @author Ashley
+ */
 public class GameOfLife extends Application {
     private static final int gridWidth = 50, gridHeight = 50;
     private static final double gameWidth = 1000, gameHeight = 1000;

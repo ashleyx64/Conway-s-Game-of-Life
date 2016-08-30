@@ -21,7 +21,10 @@ import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
 /**
- *
+ * The main game stage, used to display the game to the player and to
+ * process input such as mouse clicks, button presses, scrolls and key
+ * presses. Handles all the GUI elements as well as the main game loop
+ * and updating the various counters displayed to the player
  * @author Ashley Allen
  */
 public class GameStage extends Stage {
@@ -45,6 +48,14 @@ public class GameStage extends Stage {
     private int refreshRate = 240;
     private long timeCounter = 0;
     
+    /**
+     * Default constructor
+     * @param gridWidth the width of the game grid
+     * @param gridHeight the height of the game grid
+     * @param gameWidth the width of the game canvas in pixels
+     * @param gameHeight the height of the game canvas in pixels
+     * @param example true if an example should be generated on startup
+     */
     public GameStage(int gridWidth, int gridHeight, double gameWidth, double gameHeight, boolean example) {
  
         

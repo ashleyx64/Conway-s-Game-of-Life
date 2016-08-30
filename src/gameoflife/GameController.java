@@ -14,6 +14,12 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
+/**
+ * The class that handles all the game logic including: drawing the game to the
+ * canvas, updating the state of the cells after each generation and processing
+ * the zoom level of the grid
+ * @author Ashley
+ */
 public class GameController {
     private int gridWidth, gridHeight;
     private final double gameWidth, gameHeight;
@@ -22,6 +28,13 @@ public class GameController {
     private final List<Integer[]> marks = new ArrayList<>(), checks = new ArrayList<>();
     private final GraphicsContext gc;
     
+    /**
+     * Default constructor
+     * @param gridWidth the initial width of the game grid
+     * @param gridHeight the initial height of the game grid
+     * @param gc the GraphicsContext that used to display the game
+     * @param example true if an example should be generated on startup
+     */
     public GameController(int gridWidth, int gridHeight, GraphicsContext gc, boolean example) {
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
@@ -57,6 +70,9 @@ public class GameController {
         }
     }
     
+    /**
+     * Draws the game to the specified GraphicsContext given in the constructor
+     */
     public void drawGame() {
         //For the size of the grid determine whether there is a cell at each
         //coordinate and draw the corresponding colour
@@ -75,6 +91,12 @@ public class GameController {
         }
     }
     
+    /**
+     * Updates the state of all alive cells and their neighbour cells,
+     * essentially it applies the rules of Conway's Game of Life to each cell
+     * to be checked and then marks it for toggling before toggling all
+     * marked cells
+     */
     public void updateStates() {
         //Add all alive cells and their surrounding cells to a check list
         cells.entrySet().stream().forEach((entry) -> {
@@ -138,6 +160,13 @@ public class GameController {
         return sum;
     }
     
+    /**
+     * Toggles a cell at the specified coordinates, more precisely it creates
+     * a cell at the specified coordinates if none exists or removes a cell
+     * from the specified coordinates if one exists
+     * @param x the x coordinate of the cell to toggle
+     * @param y the y coordinate of the cell to toggle
+     */
     public void toggleCell(int x, int y) {
         String hashKey = getHashKey(x, y);
         if (cells.containsKey(hashKey)) {
@@ -147,14 +176,29 @@ public class GameController {
         }
     }
     
+    /**
+     * Converts a given x window coordinate relative to the game grid into a
+     * x grid coordinate
+     * @param x the window coordinate to be converted
+     * @return the converted coordinate
+     */    
     public int convertX(double x) {
         return (int) (x / hFactor);
     }
     
+    /**
+     * Converts a given y window coordinate relative to the game grid into a
+     * y grid coordinate
+     * @param y the window coordinate to be converted
+     * @return the converted coordinate
+     */
     public int convertY(double y) {
         return (int) (y / vFactor);
     }
     
+    /**
+     * Clears the cell storage
+     */
     public void clear() {
         cells.clear();
     }
@@ -181,6 +225,12 @@ public class GameController {
 //        });
 //    }
     
+    /**
+     * Changes to size of the active game grid viewed on the canvas by 1 in
+     * each dimension
+     * @param increase true if the game should be zoomed in and false otherwise
+     */
+        
     public void changeZoom(boolean increase) {
         if (increase) {
             if (gridWidth < 100 && gridHeight < 100) {
@@ -197,10 +247,14 @@ public class GameController {
         vFactor = gameHeight / gridHeight;
     }
     
-    public static String getHashKey(int x, int y) {
+    private String getHashKey(int x, int y) {
         return "" + x + "_" + y;
     }
     
+    /**
+     * Returns the number of currently alive cells
+     * @return the number of currently alive cells
+     */
     public int getNumCells() {
         return cells.size();
     }
