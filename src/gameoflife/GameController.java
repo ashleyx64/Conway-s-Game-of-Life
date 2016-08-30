@@ -160,28 +160,25 @@ public class GameController {
     }
     
 //    public void moveGameArea(KeyCode k) {
-//        switch (k) {
-//            case UP:
-//                cells.stream().forEach((cell) -> {
-//                    cell.setY(cell.getY() + 1);
-//                });
-//                break;
-//            case DOWN:
-//                cells.stream().forEach((cell) -> {
-//                    cell.setY(cell.getY() - 1);
-//                });
-//                break;
-//            case RIGHT:
-//                cells.stream().forEach((cell) -> {
-//                    cell.setX(cell.getX() - 1);
-//                });
-//                break;
-//            case LEFT:
-//                cells.stream().forEach((cell) -> {
-//                    cell.setX(cell.getX() + 1);
-//                });
-//                break;
-//        }
+//        cells.entrySet().stream().forEach((entry) -> {
+//            Cell cell = entry.getValue();
+//            int x = cell.getX(), y = cell.getY();
+//            cells.remove(getHashKey(x, y));
+//            switch (k) {
+//                case UP:
+//                    cells.put(getHashKey(x, y + 1), new Cell(x, y + 1));
+//                    break;
+//                case DOWN:
+//                    cells.put(getHashKey(x, y - 1), new Cell(x, y - 1));
+//                    break;
+//                case RIGHT:
+//                    cells.put(getHashKey(x - 1, y), new Cell(x - 1, y));
+//                    break;
+//                case LEFT:
+//                    cells.put(getHashKey(x + 1, y), new Cell(x + 1, y));
+//                    break;
+//            }
+//        });
 //    }
     
     public void changeZoom(boolean increase) {
