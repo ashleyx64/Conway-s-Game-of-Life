@@ -23,7 +23,7 @@ public class GameController {
     private int gridWidth, gridHeight;
     private final double gameWidth, gameHeight;
     private double hFactor, vFactor;
-    private final Map<String, Cell> cells = new HashMap<>();
+    private final Map<String, Integer[]> cells = new HashMap<>();
     private final List<Integer[]> marks = new ArrayList<>(), checks = new ArrayList<>();
     private final GraphicsContext gc;
     
@@ -63,7 +63,7 @@ public class GameController {
             for (int x = 0; x < 13; x++) {
                 if (line.charAt(x) == 'X') {
                     int cx = x + startX, cy = y + startY;
-                    cells.put(getHashKey(cx, cy), new Cell(cx, cy));
+                    cells.put(getHashKey(cx, cy), new Integer[] {cx, cy});
                 }
             }
         }
@@ -79,10 +79,10 @@ public class GameController {
         gc.setLineWidth(2);
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
-                if (cells.containsKey(getHashKey(x, y))) {
-                    gc.setFill(Color.BLACK);
-                } else {
+                if (cells.get(getHashKey(x, y)) == null) {
                     gc.setFill(Color.WHITE);
+                } else {
+                    gc.setFill(Color.BLACK);
                 }
                 gc.fillRect(x * hFactor, y * vFactor, hFactor, vFactor);
                 gc.strokeRect(x * hFactor, y * vFactor, hFactor, vFactor);
@@ -99,13 +99,13 @@ public class GameController {
     public void updateStates() {
         //Add all alive cells and their surrounding cells to a check list
         cells.entrySet().stream().forEach((entry) -> {
-            Cell cell = entry.getValue();
-            int x = cell.getX(), y = cell.getY();
+            Integer[] coords = entry.getValue();
+            int x = coords[0], y = coords[1];
             for (int cx = x - 1; cx < x + 2; cx++) {
                 for (int cy = y - 1; cy < y + 2; cy++) {
-                    Integer[] coords = {cx, cy};
-                    if (!contains(checks, coords)) {
-                        checks.add(coords);
+                    Integer[] checkCoords = {cx, cy};
+                    if (!contains(checks, checkCoords)) {
+                        checks.add(checkCoords);
                     }
                 }
             }
@@ -121,14 +121,14 @@ public class GameController {
             String hashKey = getHashKey(x, y);
             int adjCells = getAdjCells(x, y);
 //            System.out.println("Cell at " + x + ", " + y + " has " + adjCells + " adjacent cells");
-            if (cells.containsKey(hashKey)) {
-                if (adjCells < 2 || adjCells > 3) {
-                    marks.add(coords);
-                }                
-            } else {
+            if (cells.get(hashKey) == null) {
                 if (adjCells == 3) {
                     marks.add(coords);
-                }
+                }              
+            } else {
+                if (adjCells < 2 || adjCells > 3) {
+                    marks.add(coords);
+                }                  
             }
         });
         checks.clear();
@@ -150,7 +150,7 @@ public class GameController {
         for (int cx = x - 1; cx < x + 2; cx++) {
             for (int cy = y - 1; cy < y + 2; cy++) {
                 if (!(cx == x && cy == y)) {
-                    if (cells.containsKey(getHashKey(cx, cy))) {
+                    if (cells.get(getHashKey(cx, cy)) != null) {
                         sum++;
                     }
                 }
@@ -168,10 +168,10 @@ public class GameController {
      */
     public void toggleCell(int x, int y) {
         String hashKey = getHashKey(x, y);
-        if (cells.containsKey(hashKey)) {
-            cells.remove(hashKey);
+        if (cells.get(hashKey) == null) {
+            cells.put(hashKey, new Integer[] {x, y});
         } else {
-            cells.put(hashKey, new Cell(x, y));
+            cells.remove(hashKey);
         }
     }
     
