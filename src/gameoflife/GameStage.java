@@ -13,7 +13,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
@@ -40,12 +39,14 @@ public class GameStage extends Stage {
     private final TextField refreshRateTxtFld;
     private final Button refreshRateUpdateBtn = new Button("Update");
     private final Label fpsLbl = new Label("FPS: 0");
-    private final Label timeLbl = new Label("Time: 0");
+    private final Label genLbl = new Label("Generations: 0");
     private final Label cellsLbl = new Label("Cells: 0");
+    private final Label timeElapsedLbl = new Label("Time Elapsed: 0s");
     private final Scene scene = new Scene(root);
     
     private boolean updateStates = false, skipFrame = false;
     private int refreshRate = 240;
+    private long genCounter = 0;
     private long timeCounter = 0;
     
     /**
@@ -87,6 +88,7 @@ public class GameStage extends Stage {
         
         resetBtn.setOnAction((ActionEvent t) -> {
             game.clear();
+            genCounter = 0;
             timeCounter = 0;
             updateStates = false;
             playPauseBtn.setText("Play");
@@ -107,44 +109,49 @@ public class GameStage extends Stage {
         
         new AnimationTimer() {
             
-            long prevNanoTime = System.nanoTime();
-            long frameNanoTime = System.nanoTime();
+            long updateNanoTime = System.nanoTime();
+            long secondNanoTime = System.nanoTime();
             long frameCounter = 0;
             
             @Override
             public void handle(long currentNanoTime) {
-                if (updateStates && currentNanoTime - prevNanoTime >= refreshRate * 1_000_000 || skipFrame) {
+                if (updateStates && currentNanoTime - updateNanoTime >= refreshRate * 1_000_000 || skipFrame) {
                     game.updateStates();
                     frameCounter++;
-                    timeCounter++;
+                    genCounter++;
                     skipFrame = false;
-                    prevNanoTime = currentNanoTime;                    
+                    updateNanoTime = currentNanoTime;                    
                 }
                 
-                if (currentNanoTime - frameNanoTime >= 1_000_000_000) {
+                if (currentNanoTime - secondNanoTime >= 1_000_000_000) {
+                    if (updateStates) {
+                        timeCounter++;
+                    }
                     fpsLbl.setText("FPS: " + String.valueOf(frameCounter));                    
                     frameCounter = 0;
-                    frameNanoTime = currentNanoTime;
+                    secondNanoTime = currentNanoTime;
                 }
                 
-                timeLbl.setText("Time: " + String.valueOf(timeCounter));
+                genLbl.setText("Generations: " + String.valueOf(genCounter));
                 
                 cellsLbl.setText("Cells: " + game.getNumCells());
+                
+                timeElapsedLbl.setText("Time Elapsed: " + timeCounter + "s");
+                
+                if (genCounter == 5206) {
+                    updateStates = false;
+                }
                 
                 game.drawGame();
             }
             
         }.start();
         
-//        scene.setOnKeyPressed((KeyEvent t) -> {
-//            game.moveGameArea(t.getCode());
-//        });
-        
         scene.setOnScroll((ScrollEvent t) -> {
             game.changeZoom(t.getDeltaY() < 0);
         });
         
-        toolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, fpsLbl, timeLbl, cellsLbl);
+        toolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn, fpsLbl, genLbl, cellsLbl, timeElapsedLbl);
         toolbar.getChildren().stream().forEach((node) -> {
             node.setFocusTraversable(false);
         });

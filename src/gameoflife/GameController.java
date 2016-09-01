@@ -11,7 +11,6 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 
 /**
@@ -202,28 +201,6 @@ public class GameController {
     public void clear() {
         cells.clear();
     }
-    
-//    public void moveGameArea(KeyCode k) {
-//        cells.entrySet().stream().forEach((entry) -> {
-//            Cell cell = entry.getValue();
-//            int x = cell.getX(), y = cell.getY();
-//            cells.remove(getHashKey(x, y));
-//            switch (k) {
-//                case UP:
-//                    cells.put(getHashKey(x, y + 1), new Cell(x, y + 1));
-//                    break;
-//                case DOWN:
-//                    cells.put(getHashKey(x, y - 1), new Cell(x, y - 1));
-//                    break;
-//                case RIGHT:
-//                    cells.put(getHashKey(x - 1, y), new Cell(x - 1, y));
-//                    break;
-//                case LEFT:
-//                    cells.put(getHashKey(x + 1, y), new Cell(x + 1, y));
-//                    break;
-//            }
-//        });
-//    }
     
     /**
      * Changes to size of the active game grid viewed on the canvas by 1 in
