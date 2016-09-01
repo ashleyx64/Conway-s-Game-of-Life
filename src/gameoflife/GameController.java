@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 /**
  * The class that handles all the game logic including: drawing the game to the
@@ -23,8 +24,8 @@ public class GameController {
     private int gridWidth, gridHeight;
     private final double gameWidth, gameHeight;
     private double hFactor, vFactor;
-    private final Map<String, Integer[]> cells = new HashMap<>();
-    private final List<Integer[]> marks = new ArrayList<>(), checks = new ArrayList<>();
+    private Map<String, Integer[]> cells = new HashMap<>(), newCells = new HashMap<>();
+    private final List<Integer[]> checks = new ArrayList<>();
     private final GraphicsContext gc;
     
     /**
@@ -75,19 +76,23 @@ public class GameController {
     public void drawGame() {
         //For the size of the grid determine whether there is a cell at each
         //coordinate and draw the corresponding colour
-        gc.setStroke(Color.SILVER);
-        gc.setLineWidth(2);
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
                 if (cells.get(getHashKey(x, y)) == null) {
-                    gc.setFill(Color.WHITE);
+                    drawSquare(x, y, Color.WHITE, Color.SILVER);
                 } else {
-                    gc.setFill(Color.BLACK);
+                    drawSquare(x, y, Color.BLACK, Color.SILVER);
                 }
-                gc.fillRect(x * hFactor, y * vFactor, hFactor, vFactor);
-                gc.strokeRect(x * hFactor, y * vFactor, hFactor, vFactor);
             }
         }
+    }
+    
+    private void drawSquare(int x, int y, Paint fill, Paint stroke) {
+        gc.setLineWidth(2);
+        gc.setStroke(stroke);
+        gc.setFill(fill);
+        gc.fillRect(x * hFactor, y * vFactor, hFactor, vFactor);
+        gc.strokeRect(x * hFactor, y * vFactor, hFactor, vFactor);
     }
     
     /**
@@ -123,22 +128,19 @@ public class GameController {
 //            System.out.println("Cell at " + x + ", " + y + " has " + adjCells + " adjacent cells");
             if (cells.get(hashKey) == null) {
                 if (adjCells == 3) {
-                    marks.add(coords);
-                }              
+                    newCells.putIfAbsent(hashKey, coords);
+                }
             } else {
-                if (adjCells < 2 || adjCells > 3) {
-                    marks.add(coords);
-                }                  
+                if (adjCells >= 2 && adjCells <= 3) {
+                    newCells.putIfAbsent(hashKey, coords);
+                }
             }
         });
         checks.clear();
         
-        //For each pair of coordinates in marks toggle the cell at those
-        //coordinates
-        marks.stream().forEach((coords) -> {
-            toggleCell(coords[0], coords[1]);
-        });
-        marks.clear();
+        //Copy the new map into the old map and clear the new map
+        cells = new HashMap<>(newCells);
+        newCells.clear();
     }
     
     private boolean contains(List<Integer[]> list, Integer[] elem) {
