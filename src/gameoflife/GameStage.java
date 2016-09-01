@@ -45,7 +45,7 @@ public class GameStage extends Stage {
     private final Scene scene = new Scene(root);
     
     private boolean updateStates = false, skipFrame = false;
-    private int refreshRate = 240;
+    private int refreshRate = 0;
     private long genCounter = 0;
     private long timeCounter = 0;
     

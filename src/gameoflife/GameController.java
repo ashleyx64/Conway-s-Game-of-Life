@@ -2,10 +2,7 @@ package gameoflife;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -24,8 +21,7 @@ public class GameController {
     private int gridWidth, gridHeight;
     private final double gameWidth, gameHeight;
     private double hFactor, vFactor;
-    private Map<String, Integer[]> cells = new HashMap<>(), newCells = new HashMap<>();
-    private final List<Integer[]> checks = new ArrayList<>();
+    private Map<String, Integer[]> cells = new HashMap<>(), newCells = new HashMap<>(), checks = new HashMap<>();
     private final GraphicsContext gc;
     
     /**
@@ -108,10 +104,7 @@ public class GameController {
             int x = coords[0], y = coords[1];
             for (int cx = x - 1; cx < x + 2; cx++) {
                 for (int cy = y - 1; cy < y + 2; cy++) {
-                    Integer[] checkCoords = {cx, cy};
-                    if (!contains(checks, checkCoords)) {
-                        checks.add(checkCoords);
-                    }
+                    checks.putIfAbsent(getHashKey(cx, cy), new Integer[] {cx, cy});
                 }
             }
         });
@@ -121,11 +114,12 @@ public class GameController {
         //For each pair of coordinate in checks compute whether the state
         //of the cell at those coordinates should be toggled or not and mark
         //those coordinates if so
-        checks.stream().forEach((coords) -> {
+        checks.entrySet().stream().forEach((entry) -> {
+            Integer[] coords = entry.getValue();
             int x = coords[0], y = coords[1];
             String hashKey = getHashKey(x, y);
             int adjCells = getAdjCells(x, y);
-//            System.out.println("Cell at " + x + ", " + y + " has " + adjCells + " adjacent cells");
+//            System.out.println("Cell at " + x + ", " + y + " has " + adjCells + " adjacent cells");  
             if (cells.get(hashKey) == null) {
                 if (adjCells == 3) {
                     newCells.putIfAbsent(hashKey, coords);
@@ -134,17 +128,13 @@ public class GameController {
                 if (adjCells >= 2 && adjCells <= 3) {
                     newCells.putIfAbsent(hashKey, coords);
                 }
-            }
+            }            
         });
         checks.clear();
         
         //Copy the new map into the old map and clear the new map
         cells = new HashMap<>(newCells);
         newCells.clear();
-    }
-    
-    private boolean contains(List<Integer[]> list, Integer[] elem) {
-        return list.stream().anyMatch((listElem) -> Arrays.equals(listElem, elem));
     }
     
     private int getAdjCells(int x, int y) {
