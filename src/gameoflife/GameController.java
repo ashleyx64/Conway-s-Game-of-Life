@@ -42,6 +42,7 @@ public class GameController {
         if (example) {
             placeExample();
         }
+        drawGrid();
     }
     
     private void placeExample() {
@@ -69,7 +70,7 @@ public class GameController {
     /**
      * Draws the game to the specified GraphicsContext given in the constructor
      */
-    public void drawGame() {
+    public void drawGrid() {
         //For the size of the grid determine whether there is a cell at each
         //coordinate and draw the corresponding colour
         for (int x = 0; x < gridWidth; x++) {
@@ -132,6 +133,10 @@ public class GameController {
         });
         checks.clear();
         
+        //Draw any cell changes
+        drawChanges(newCells, cells, Color.BLACK);
+        drawChanges(cells, newCells, Color.WHITE);
+        
         //Copy the new map into the old map and clear the new map
         cells = new HashMap<>(newCells);
         newCells.clear();
@@ -151,6 +156,16 @@ public class GameController {
         return sum;
     }
     
+    private void drawChanges(Map<String, Integer[]> map1, Map<String, Integer[]> map2, Paint fill) {
+        map1.entrySet().stream().filter((entry) -> {
+            Integer[] coords = entry.getValue();
+            return map2.get(entry.getKey()) == null && coords[0] >= 0 && coords[0] < gridWidth && coords[1] >= 0 && coords[1] < gridHeight;
+        }).forEach((entry) -> {
+            Integer[] coords = entry.getValue();
+            drawSquare(coords[0], coords[1], fill, Color.SILVER);
+        });        
+    }
+    
     /**
      * Toggles a cell at the specified coordinates, more precisely it creates
      * a cell at the specified coordinates if none exists or removes a cell
@@ -162,8 +177,10 @@ public class GameController {
         String hashKey = getHashKey(x, y);
         if (cells.get(hashKey) == null) {
             cells.put(hashKey, new Integer[] {x, y});
+            drawSquare(x, y, Color.BLACK, Color.SILVER);
         } else {
             cells.remove(hashKey);
+            drawSquare(x, y, Color.WHITE, Color.SILVER);
         }
     }
     
@@ -191,6 +208,10 @@ public class GameController {
      * Clears the cell storage
      */
     public void clear() {
+        cells.entrySet().stream().forEach((entry) -> {
+            Integer[] coords = entry.getValue();
+            drawSquare(coords[0], coords[1], Color.WHITE, Color.SILVER);
+        });
         cells.clear();
     }
     
@@ -214,6 +235,7 @@ public class GameController {
         }
         hFactor = gameWidth / gridWidth;
         vFactor = gameHeight / gridHeight;
+        drawGrid();
     }
     
     private String getHashKey(int x, int y) {

@@ -61,7 +61,6 @@ public class GameStage extends Stage {
  
         
         gameDisplay = new Canvas(gameWidth, gameHeight);
-        gameDisplay.setFocusTraversable(true);
         
         gc = gameDisplay.getGraphicsContext2D();
         
@@ -141,8 +140,6 @@ public class GameStage extends Stage {
                 if (genCounter == 5206) {
                     updateStates = false;
                 }
-                
-                game.drawGame();
             }
             
         }.start();
