@@ -2,7 +2,9 @@ package gameoflife;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -23,6 +25,7 @@ public class GameController {
     private double hFactor, vFactor;
     private Map<String, Integer[]> cells = new HashMap<>(), newCells = new HashMap<>(), checks = new HashMap<>();
     private final GraphicsContext gc;
+    private final List<Object[]> machines = new ArrayList<>();
     
     /**
      * Default constructor
@@ -39,38 +42,31 @@ public class GameController {
         this.gc = gc;
         hFactor = gameWidth / gridWidth;
         vFactor = gameHeight / gridHeight;
-        if (example) {
-            placeExample();
-        }
-        drawGrid();
-    }
-    
-    private void placeExample() {
-        //Reads an example machine from exampleTemplate.txt and then writes it
-        //to the game
-        Scanner scanner;
+        
         try {
-            scanner = new Scanner(new File("src\\gameoflife\\exampleTemplate.txt"));
+            Scanner sc = new Scanner(new File("src\\gameoflife\\exampleMachines.txt"));
+            while (sc.hasNext()) {
+                String machineName = sc.next();
+                int x = sc.nextInt(), y = sc.nextInt();
+                boolean[][] machineTemplate = new boolean[y][x];
+                for (int i = 0; i < y; i++) {
+                    for (int j = 0; j < x; j++) {
+                        machineTemplate[i][j] = sc.next().charAt(0) == 'X';
+                    }
+                }
+                machines.add(new Object[] {machineName, x, y, machineTemplate});
+            }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-            return;
         }
-        int startX = gridWidth / 2 - 7, startY = gridHeight / 2 - 7;
-        for (int y = 0; y < 13; y++) {
-            String line = scanner.next();
-            for (int x = 0; x < 13; x++) {
-                if (line.charAt(x) == 'X') {
-                    int cx = x + startX, cy = y + startY;
-                    cells.put(getHashKey(cx, cy), new Integer[] {cx, cy});
-                }
-            }
-        }
+        
+        drawGrid();
     }
     
     /**
      * Draws the game to the specified GraphicsContext given in the constructor
      */
-    public void drawGrid() {
+    public final void drawGrid() {
         //For the size of the grid determine whether there is a cell at each
         //coordinate and draw the corresponding colour
         for (int x = 0; x < gridWidth; x++) {
@@ -248,5 +244,24 @@ public class GameController {
      */
     public int getNumCells() {
         return cells.size();
+    }
+    
+    public void drawMachine(Object[] machine) {
+        int machX = (int) machine[1], machY = (int) machine[2];
+        int startX = gridWidth / 2 - machX / 2, startY = gridHeight / 2 - machY / 2;
+        boolean[][] machineTemplate = (boolean[][]) machine[3];
+        for (int i = 0; i < machY; i++) {
+            for (int j = 0; j < machX; j++) {
+                if (machineTemplate[i][j]) {
+                    int x = j + startX, y = i + startY;
+                    cells.put(getHashKey(x, y), new Integer[] {x, y});
+                    drawSquare(x, y, Color.BLACK, Color.SILVER);
+                }
+            }
+        }
+    }
+    
+    public List<Object[]> getMachines() {
+        return machines;
     }
 }

@@ -1,0 +1,45 @@
+Pulsar 13 13
+O O X X X O O O X X X O O
+O O O O O O O O O O O O O
+X O O O O X O X O O O O X
+X O O O O X O X O O O O X
+X O O O O X O X O O O O X
+O O X X X O O O X X X O O
+O O O O O O O O O O O O O
+O O X X X O O O X X X O O
+X O O O O X O X O O O O X
+X O O O O X O X O O O O X
+X O O O O X O X O O O O X
+O O O O O O O O O O O O O
+O O X X X O O O X X X O O
+Glider 3 3
+X O O
+O X X
+X X O
+LWSS 5 4
+X O O X O
+O O O O X
+X O O O X
+O X X X X
+R-pentomino 3 3
+O X X
+X X O
+O X O
+Diehard 8 3
+O O O O O O X O
+X X O O O O O O
+O X O O O X X X
+Acorn 7 3
+O X O O O O O
+O O O X O O O
+X X O O X X X
+GosperGliderGun 36 9
+O O O O O O O O O O O O O O O O O O O O O O O O X O O O O O O O O O O O
+O O O O O O O O O O O O O O O O O O O O O O X O X O O O O O O O O O O O
+O O O O O O O O O O O O X X O O O O O O X X O O O O O O O O O O O O X X
+O O O O O O O O O O O X O O O X O O O O X X O O O O O O O O O O O O X X
+X X O O O O O O O O X O O O O O X O O O X X O O O O O O O O O O O O O O
+X X O O O O O O O O X O O O X O X X O O O O X O X O O O O O O O O O O O
+O O O O O O O O O O X O O O O O X O O O O O O O X O O O O O O O O O O O
+O O O O O O O O O O O X O O O X O O O O O O O O O O O O O O O O O O O O
+O O O O O O O O O O O O X X O O O O O O O O O O O O O O O O O O O O O O

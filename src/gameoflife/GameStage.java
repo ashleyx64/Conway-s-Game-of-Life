@@ -1,7 +1,7 @@
 package gameoflife;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -53,7 +53,7 @@ public class GameStage extends Stage {
     
     private final HBox machineToolbar = new HBox(5);
     private final Label machineLbl = new Label("Machines:");
-    private final Map<String, Button> machineBtns = new HashMap<>();
+    private final List<Button> machineBtns = new ArrayList<>();
     
     private final Canvas gameCanvas;
     private final GraphicsContext gameGC;
@@ -77,7 +77,7 @@ public class GameStage extends Stage {
         
         root.add(btnToolbar, 0, 0);
         root.add(lblToolbar, 1, 0);
-//        root.add(machineToolbar, 0, 1, 2, 1);
+        root.add(machineToolbar, 0, 1, 2, 1);
         root.add(gameCanvas, 0, 2, 2, 1);
         
         scene.setOnScroll((ScrollEvent t) -> {
@@ -126,11 +126,17 @@ public class GameStage extends Stage {
         
         machineToolbar.setPadding(new Insets(5));
         machineToolbar.setAlignment(Pos.CENTER_LEFT);
-        machineToolbar.getChildren().add(machineLbl);
+        machineToolbar.getChildren().addAll(machineLbl);
         
-        machineBtns.entrySet().stream().forEach((entry) -> {
-            machineToolbar.getChildren().add(entry.getValue());
+        gameController.getMachines().stream().forEach((machine) -> {
+            Button newBtn = new Button((String) machine[0]);
+            newBtn.setOnAction((ActionEvent t) -> {
+                gameController.clear();
+                gameController.drawMachine(machine);
+            });
+            machineBtns.add(newBtn);
         });
+        machineToolbar.getChildren().addAll(machineBtns);
         
         gameCanvas.setOnMouseClicked((MouseEvent t) -> {
             gameController.toggleCell(gameController.convertX(t.getX()), gameController.convertY(t.getY()));
