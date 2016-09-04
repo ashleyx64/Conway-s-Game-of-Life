@@ -1,15 +1,19 @@
 # Conway's Game of Life
-<p><b>A version of Conway's Game of Life created using JavaFX</b></p>
-<p>Features:</p>
+<h2>A version of Conway's Game of Life created using JavaFX</h2>
+<p><b>Instructions:</b></p>
+<p>Use the buttons at the top to control the game and use the scroll wheel to
+resize the game grid</p>
+<p><b>Features:</b></p>
 <ul>
   <li>Play/pause button</li>
+  <li>Skip frame button</li>
   <li>Clear button</li>
-  <li>Variable refresh rate</li>
-  <li>Select whether the edge of the game wraps or not</li>
-  <li>(Semi) Infinite grid size</li>
-  <li>Option to generate example machine on startup</li>
-  <li>Option to select game size on startup</li>
+  <li>Variable frame delay</li>
+  <li>(Semi) infinite grid size</li>
+  <li>Statistics!</li>
+  <li>Resizable game grid</li>
 </ul>
-<p>TODO:</p>
+<p><b>TODO:</b></p>
 <ul>
+  <li>Ability to add a number of example machines</li>
 </ul>
