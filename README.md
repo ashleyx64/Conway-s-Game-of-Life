@@ -1,8 +1,7 @@
 # Conway's Game of Life
 <h2>A version of Conway's Game of Life created using JavaFX</h2>
 <p><b>Instructions:</b></p>
-<p>Use the buttons at the top to control the game and use the scroll wheel to
-resize the game grid</p>
+<p>Use the buttons at the top to control the game, click to turn cells on and off and use the scroll wheel to resize the game grid</p>
 <p><b>Features:</b></p>
 <ul>
   <li>Play/pause button</li>
