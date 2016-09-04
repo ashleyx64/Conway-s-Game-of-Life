@@ -15,7 +15,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.GridPane;
@@ -31,7 +30,7 @@ import javafx.stage.Stage;
  */
 public class GameStage extends Stage {
     private boolean updateStates = false, skipFrame = false;
-    private int refreshRate = 0;
+    private int frameDelay = 0;
     private long genCounter = 0;
     private long timeCounter = 0;    
         
@@ -42,9 +41,9 @@ public class GameStage extends Stage {
     private final Button playPauseBtn = new Button("Play");
     private final Button skipFrameBtn = new Button("Skip Frame");
     private final Button resetBtn = new Button("Reset");
-    private final Label refreshRateLbl = new Label("Refresh rate:");
-    private final TextField refreshRateTxtFld = new TextField(String.valueOf(refreshRate));
-    private final Button refreshRateUpdateBtn = new Button("Update");
+    private final Label frameDelayLbl = new Label("Frame delay (ms):");
+    private final TextField frameDelayTxtFld = new TextField(String.valueOf(frameDelay));
+    private final Button frameDelayBtn = new Button("Update");
     
     private final HBox lblToolbar = new HBox(5);
     private final Label fpsLbl = new Label("FPS: 0");
@@ -87,7 +86,7 @@ public class GameStage extends Stage {
         
         btnToolbar.setPadding(new Insets(5));
         btnToolbar.setAlignment(Pos.CENTER_LEFT);
-        btnToolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, refreshRateLbl, refreshRateTxtFld, refreshRateUpdateBtn);
+        btnToolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, frameDelayLbl, frameDelayTxtFld, frameDelayBtn);
         
         playPauseBtn.setPrefWidth(60);
         playPauseBtn.setOnAction((ActionEvent t) -> {
@@ -110,11 +109,11 @@ public class GameStage extends Stage {
             playPauseBtn.setText("Play");
         });
         
-        refreshRateTxtFld.setTooltip(new Tooltip("Delay between frames in ms"));
+        frameDelayTxtFld.setPrefWidth(60);
         
-        refreshRateUpdateBtn.setOnAction((ActionEvent t) -> {
+        frameDelayBtn.setOnAction((ActionEvent t) -> {
             try {
-                refreshRate = Integer.parseInt(refreshRateTxtFld.getText());
+                frameDelay = Integer.parseInt(frameDelayTxtFld.getText());
             } catch (NumberFormatException ex) {
                 new Alert(AlertType.WARNING, "That is not a valid number", ButtonType.OK).showAndWait();
             }
@@ -148,7 +147,7 @@ public class GameStage extends Stage {
             
             @Override
             public void handle(long currentNanoTime) {
-                if (updateStates && currentNanoTime - updateNanoTime >= refreshRate * 1_000_000 || skipFrame) {
+                if (updateStates && currentNanoTime - updateNanoTime >= frameDelay * 1_000_000 || skipFrame) {
                     gameController.updateStates();
                     frameCounter++;
                     genCounter++;
