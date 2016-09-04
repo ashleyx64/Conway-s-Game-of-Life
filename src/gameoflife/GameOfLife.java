@@ -47,7 +47,6 @@ public class GameOfLife extends Application {
             primaryStage.hide();
             new GameStage(gridWidth, gridHeight, gameWidth, gameHeight, exampleChkBx.isSelected()).show();
         });
-        
     }
 
     /**
