@@ -78,7 +78,7 @@ public class GameStage extends Stage {
         
         root.add(btnToolbar, 0, 0);
         root.add(lblToolbar, 1, 0);
-        root.add(machineToolbar, 0, 1, 2, 1);
+//        root.add(machineToolbar, 0, 1, 2, 1);
         root.add(gameCanvas, 0, 2, 2, 1);
         
         scene.setOnScroll((ScrollEvent t) -> {
