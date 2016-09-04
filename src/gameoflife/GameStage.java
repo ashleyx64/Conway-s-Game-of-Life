@@ -175,10 +175,6 @@ public class GameStage extends Stage {
                 cellsLbl.setText("Cells: " + gameController.getNumCells());
                 
                 timeElapsedLbl.setText("Time Elapsed: " + timeCounter + "s");
-                
-                if (genCounter == 5206) {
-                    updateStates = false;
-                }
             }
             
         }.start();

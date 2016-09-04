@@ -43,8 +43,7 @@ public class GameController {
         hFactor = gameWidth / gridWidth;
         vFactor = gameHeight / gridHeight;
         
-        try {
-            Scanner sc = new Scanner(new File("src\\gameoflife\\exampleMachines.txt"));
+        try (Scanner sc = new Scanner(this.getClass().getResourceAsStream("exampleMachines.txt"))) {
             while (sc.hasNext()) {
                 String machineName = sc.next();
                 int x = sc.nextInt(), y = sc.nextInt();
@@ -56,8 +55,6 @@ public class GameController {
                 }
                 machines.add(new Object[] {machineName, x, y, machineTemplate});
             }
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         drawGrid();
