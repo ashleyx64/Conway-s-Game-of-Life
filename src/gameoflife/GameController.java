@@ -1,14 +1,10 @@
 package gameoflife;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -243,6 +239,10 @@ public class GameController {
         return cells.size();
     }
     
+    /**
+     * Draws the specified machine to the game grid
+     * @param machine the machine that is to be written
+     */
     public void drawMachine(Object[] machine) {
         int machX = (int) machine[1], machY = (int) machine[2];
         int startX = gridWidth / 2 - machX / 2, startY = gridHeight / 2 - machY / 2;
@@ -258,6 +258,10 @@ public class GameController {
         }
     }
     
+    /**
+     * Returns the ArrayList that stores the machines
+     * @return the list of machines
+     */
     public List<Object[]> getMachines() {
         return machines;
     }
