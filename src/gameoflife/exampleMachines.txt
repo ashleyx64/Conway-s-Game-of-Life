@@ -12,6 +12,17 @@ X O O O O X O X O O O O X
 X O O O O X O X O O O O X
 O O O O O O O O O O O O O
 O O X X X O O O X X X O O
+Pentadecathlon 3 10
+O X O
+O X O
+X O X
+O X O
+O X O
+O X O
+O X O
+X O X
+O X O
+O X O
 Glider 3 3
 X O O
 O X X
