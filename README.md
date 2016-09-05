@@ -11,8 +11,8 @@
   <li>(Semi) infinite grid size</li>
   <li>Statistics!</li>
   <li>Resizable game grid</li>
+  <li>Ability to add a number of example machines</li>
 </ul>
 <p><b>TODO:</b></p>
 <ul>
-  <li>Ability to add a number of example machines</li>
 </ul>
