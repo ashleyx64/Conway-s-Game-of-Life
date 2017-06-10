@@ -5,9 +5,9 @@ import javafx.stage.Stage;
 
 /**
  * Main class
- * @author Ashley Allen
+ * @author Ashley
  */
-public class Main extends Application {
+public class GameOfLife extends Application {
     private static final int gridWidth = 50, gridHeight = 50;
     private static final double gameWidth = 1000, gameHeight = 1000;
     

@@ -2,7 +2,7 @@ package gameoflife;
 
 /**
  * Stores x and y coordinates
- * @author Ashley Allen
+ * @author Ashley
  */
 public class Coordinates {
     private final int x;

@@ -1,12 +1,8 @@
 # Conway's Game of Life
-
-<b>A version of Conway's Game of Life created using JavaFX</b>
-
-## Instructions:
-Use the buttons at the top to control the game, click to turn cells on and off and use the scroll wheel to resize the game grid
-
-## Features:
-
+<h2>A version of Conway's Game of Life created using JavaFX</h2>
+<p><b>Instructions:</b></p>
+<p>Use the buttons at the top to control the game, click to turn cells on and off and use the scroll wheel to resize the game grid</p>
+<p><b>Features:</b></p>
 <ul>
   <li>Play/pause button</li>
   <li>Skip frame button</li>
@@ -17,12 +13,6 @@ Use the buttons at the top to control the game, click to turn cells on and off a
   <li>Resizable game grid</li>
   <li>Ability to add a number of example machines</li>
 </ul>
-
-## TODO:
-
+<p><b>TODO:</b></p>
 <ul>
 </ul>
-
-## LICENSE
-
-This software is licensed under The MIT License. Please see the [LICENSE](LICENSE) file for more information.
