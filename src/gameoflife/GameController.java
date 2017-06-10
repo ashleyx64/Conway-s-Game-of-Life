@@ -19,41 +19,49 @@ public class GameController {
     private int gridWidth, gridHeight;
     private final double gameWidth, gameHeight;
     private double hFactor, vFactor;
-    private Map<String, Integer[]> cells = new HashMap<>(), newCells = new HashMap<>(), checks = new HashMap<>();
+    private Map<String, Coordinates> cells = new HashMap<>();
+    private final Map<String, Coordinates> newCells = new HashMap<>();
+    private final ArrayList<Coordinates> checks = new ArrayList<>();
     private final GraphicsContext gc;
     private final List<Object[]> machines = new ArrayList<>();
     
     /**
-     * Default constructor
+     * Sets all initial variables and scans in the example machines
+     * before drawing the game grid.
+     * @param gc the GraphicsContext used to display the game
      * @param gridWidth the initial width of the game grid
      * @param gridHeight the initial height of the game grid
-     * @param gc the GraphicsContext that used to display the game
-     * @param example true if an example should be generated on startup
      */
-    public GameController(int gridWidth, int gridHeight, GraphicsContext gc, boolean example) {
+    public GameController(GraphicsContext gc, int gridWidth, int gridHeight) {
+        this.gc = gc;        
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
         gameWidth = gc.getCanvas().getWidth();
         gameHeight = gc.getCanvas().getHeight();
-        this.gc = gc;
         hFactor = gameWidth / gridWidth;
         vFactor = gameHeight / gridHeight;
         
-        try (Scanner sc = new Scanner(this.getClass().getResourceAsStream("exampleMachines.txt"))) {
-            while (sc.hasNext()) {
-                String machineName = sc.next();
-                int x = sc.nextInt(), y = sc.nextInt();
-                boolean[][] machineTemplate = new boolean[y][x];
-                for (int i = 0; i < y; i++) {
-                    for (int j = 0; j < x; j++) {
-                        machineTemplate[i][j] = sc.next().charAt(0) == 'X';
-                    }
-                }
-                machines.add(new Object[] {machineName, x, y, machineTemplate});
-            }
-        }
-        
+        importExampleMachines();        
         drawGrid();
+    }
+    
+    /**
+     * Imports the example machines from the 'exampleMachines.txt' file and
+     * saves them into a custom object array for later use
+     */
+    private void importExampleMachines() {
+        Scanner scannner = new Scanner(this.getClass().getResourceAsStream("exampleMachines.txt"));
+        while (scannner.hasNext()) {
+            String machineName = scannner.next();
+            int x = scannner.nextInt(), y = scannner.nextInt();
+            boolean[][] machineTemplate = new boolean[y][x];
+            for (int i = 0; i < y; i++) {
+                for (int j = 0; j < x; j++) {
+                    machineTemplate[i][j] = scannner.next().charAt(0) == 'X';
+                }
+            }
+            machines.add(new Object[] {machineName, x, y, machineTemplate});
+        }
     }
     
     /**
@@ -82,41 +90,33 @@ public class GameController {
     }
     
     /**
-     * Updates the state of all alive cells and their neighbour cells,
-     * essentially it applies the rules of Conway's Game of Life to each cell
-     * to be checked and then marks it for toggling before toggling all
-     * marked cells
+     * Updates the state of all alive cells and their neighbour cells
      */
     public void updateStates() {
-        //Add all alive cells and their surrounding cells to a check list
-        cells.entrySet().stream().forEach((entry) -> {
-            Integer[] coords = entry.getValue();
-            int x = coords[0], y = coords[1];
+        //Add all alive cells and their surrounding cells to the checks array
+        cells.values().stream().forEach((pos) -> {
+            int x = pos.getX(), y = pos.getY();
             for (int cx = x - 1; cx < x + 2; cx++) {
                 for (int cy = y - 1; cy < y + 2; cy++) {
-                    checks.putIfAbsent(getHashKey(cx, cy), new Integer[] {cx, cy});
+                    checks.add(pos);
                 }
             }
         });
         
-//        checks.stream().forEach((coords) -> System.out.print("[" + coords[0] + ", " + coords[1] + "]"));
-        
-        //For each pair of coordinate in checks compute whether the state
+        //For each pair of coordinates in checks compute whether the state
         //of the cell at those coordinates should be toggled or not and mark
         //those coordinates if so
-        checks.entrySet().stream().forEach((entry) -> {
-            Integer[] coords = entry.getValue();
-            int x = coords[0], y = coords[1];
+        checks.stream().forEach((pos) -> {
+            int x = pos.getX(), y = pos.getY();
             String hashKey = getHashKey(x, y);
             int adjCells = getAdjCells(x, y);
-//            System.out.println("Cell at " + x + ", " + y + " has " + adjCells + " adjacent cells");  
             if (cells.get(hashKey) == null) {
                 if (adjCells == 3) {
-                    newCells.putIfAbsent(hashKey, coords);
+                    newCells.putIfAbsent(hashKey, pos);
                 }
             } else {
                 if (adjCells >= 2 && adjCells <= 3) {
-                    newCells.putIfAbsent(hashKey, coords);
+                    newCells.putIfAbsent(hashKey, pos);
                 }
             }            
         });
@@ -145,14 +145,14 @@ public class GameController {
         return sum;
     }
     
-    private void drawChanges(Map<String, Integer[]> map1, Map<String, Integer[]> map2, Paint fill) {
+    private void drawChanges(Map<String, Coordinates> map1, Map<String, Coordinates> map2, Paint fill) {
         map1.entrySet().stream().filter((entry) -> {
-            Integer[] coords = entry.getValue();
-            return map2.get(entry.getKey()) == null && coords[0] >= 0 && coords[0] < gridWidth && coords[1] >= 0 && coords[1] < gridHeight;
+            Coordinates pos = entry.getValue();
+            return map2.get(entry.getKey()) == null && pos.getX() >= 0 && pos.getX() < gridWidth && pos.getY() >= 0 && pos.getY() < gridHeight;
         }).forEach((entry) -> {
-            Integer[] coords = entry.getValue();
-            drawSquare(coords[0], coords[1], fill, Color.SILVER);
-        });        
+            Coordinates pos = entry.getValue();
+            drawSquare(pos.getX(), pos.getY(), fill, Color.SILVER);
+        });
     }
     
     /**
@@ -165,7 +165,7 @@ public class GameController {
     public void toggleCell(int x, int y) {
         String hashKey = getHashKey(x, y);
         if (cells.get(hashKey) == null) {
-            cells.put(hashKey, new Integer[] {x, y});
+            cells.put(hashKey, new Coordinates(x, y));
             drawSquare(x, y, Color.BLACK, Color.SILVER);
         } else {
             cells.remove(hashKey);
@@ -194,12 +194,12 @@ public class GameController {
     }
     
     /**
-     * Clears the cell storage
+     * Clears the cell storage and game grid
      */
     public void clear() {
         cells.entrySet().stream().forEach((entry) -> {
-            Integer[] coords = entry.getValue();
-            drawSquare(coords[0], coords[1], Color.WHITE, Color.SILVER);
+            Coordinates pos = entry.getValue();
+            drawSquare(pos.getX(), pos.getY(), Color.WHITE, Color.SILVER);
         });
         cells.clear();
     }
@@ -209,7 +209,6 @@ public class GameController {
      * each dimension
      * @param increase true if the game should be zoomed in and false otherwise
      */
-        
     public void changeZoom(boolean increase) {
         if (increase) {
             if (gridWidth < 100 && gridHeight < 100) {
@@ -251,7 +250,7 @@ public class GameController {
             for (int j = 0; j < machX; j++) {
                 if (machineTemplate[i][j]) {
                     int x = j + startX, y = i + startY;
-                    cells.put(getHashKey(x, y), new Integer[] {x, y});
+                    cells.put(getHashKey(x, y), new Coordinates(x, y));
                     drawSquare(x, y, Color.BLACK, Color.SILVER);
                 }
             }

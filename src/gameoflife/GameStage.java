@@ -73,7 +73,7 @@ public class GameStage extends Stage {
         
         gameGC = gameCanvas.getGraphicsContext2D();
         
-        gameController = new GameController(gridWidth, gridHeight, gameGC, example);     
+        gameController = new GameController(gameGC, gridWidth, gridHeight);     
         
         root.add(btnToolbar, 0, 0);
         root.add(lblToolbar, 1, 0);
