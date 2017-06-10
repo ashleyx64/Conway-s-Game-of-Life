@@ -13,7 +13,7 @@ import javafx.scene.paint.Paint;
  * The class that handles all the game logic including: drawing the game to the
  * canvas, updating the state of the cells after each generation and processing
  * the zoom level of the grid
- * @author Ashley
+ * @author Ashley Allen
  */
 public class GameController {
     private int gridWidth, gridHeight;
