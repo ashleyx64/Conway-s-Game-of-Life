@@ -18,7 +18,7 @@ public class Coordinates {
         this.y = y;
     }
     /**
-     * Get the x coordinate
+     * Gets the x coordinate
      * @return x
      */
     public int getX() {
@@ -26,7 +26,7 @@ public class Coordinates {
     }
     
     /**
-     * Get the y coordinate
+     * Gets the y coordinate
      * @return y
      */
     public int getY() {

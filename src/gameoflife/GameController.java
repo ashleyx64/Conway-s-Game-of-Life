@@ -23,6 +23,11 @@ public class GameController {
     private final GraphicsContext gc;
     private final List<Machine> machines = new ArrayList<>();
     
+    private boolean paused = true;
+    private boolean skipFrame = false;
+    private int frameDelay = 0;
+    private int generations = 0;
+    
     /**
      * Sets all initial variables and scans in the example machines
      * before drawing the game grid.
@@ -39,13 +44,13 @@ public class GameController {
         hFactor = gameWidth / gridWidth;
         vFactor = gameHeight / gridHeight;
         
-        importExampleMachines();        
+        importExampleMachines();
         drawGrid();
     }
     
     /**
      * Imports the example machines from the 'exampleMachines.txt' file and
-     * saves them into a custom object array for later use
+     * saves them into the Machine array
      */
     private void importExampleMachines() {
         Scanner scannner = new Scanner(this.getClass().getResourceAsStream("exampleMachines.txt"));
@@ -79,6 +84,13 @@ public class GameController {
         }
     }
     
+    /**
+     * Draws a square on the specified GraphicsContext
+     * @param x
+     * @param y
+     * @param fill
+     * @param stroke 
+     */
     private void drawSquare(int x, int y, Paint fill, Paint stroke) {
         gc.setLineWidth(2);
         gc.setStroke(stroke);
@@ -90,40 +102,51 @@ public class GameController {
     /**
      * Updates the state of all alive cells and their neighbour cells
      */
-    public void updateStates() {
-        //Add all alive cells and their surrounding cells to the checks array
-        Map<String, Coordinates> checks = new HashMap<>();
-        cells.values().stream().forEach((pos) -> {
-            int x = pos.getX(), y = pos.getY();
-            for (int cx = x - 1; cx < x + 2; cx++) {
-                for (int cy = y - 1; cy < y + 2; cy++) {
-                    checks.putIfAbsent(getHashKey(cx, cy), new Coordinates(cx, cy));
+    public void tick() {
+        if (!paused || skipFrame) {
+            //Add all alive cells and their surrounding cells to the checks array
+            Map<String, Coordinates> checks = new HashMap<>();
+            cells.values().stream().forEach((pos) -> {
+                int x = pos.getX(), y = pos.getY();
+                for (int cx = x - 1; cx < x + 2; cx++) {
+                    for (int cy = y - 1; cy < y + 2; cy++) {
+                        checks.putIfAbsent(getHashKey(cx, cy), new Coordinates(cx, cy));
+                    }
                 }
-            }
-        });
-        
-        //For each pair of coordinates in checks compute whether the state
-        //of the cell at those coordinates should be changed or not
-        Map<String, Coordinates> tempCells = new HashMap<>(cells);
-        checks.values().stream().forEach((pos) -> {
-            int x = pos.getX(), y = pos.getY();
-            String hashKey = getHashKey(x, y);
-            int adjCells = getNumAdjCells(x, y);
-            if (cells.get(hashKey) == null) {
-                if (adjCells == 3) {
-                    tempCells.put(hashKey, pos);
-                }
-            } else {
-                if (adjCells < 2 || adjCells > 3) {
-                    tempCells.remove(hashKey);
-                }
-            }            
-        });
-        
-        cells = tempCells;
-        drawGrid();
+            });
+
+            //For each pair of coordinates in checks compute whether the state
+            //of the cell at those coordinates should be changed or not
+            Map<String, Coordinates> tempCells = new HashMap<>(cells);
+            checks.values().stream().forEach((pos) -> {
+                int x = pos.getX(), y = pos.getY();
+                String hashKey = getHashKey(x, y);
+                int adjCells = getNumAdjCells(x, y);
+                if (cells.get(hashKey) == null) {
+                    if (adjCells == 3) {
+                        tempCells.put(hashKey, pos);
+                    }
+                } else {
+                    if (adjCells < 2 || adjCells > 3) {
+                        tempCells.remove(hashKey);
+                    }
+                }            
+            });
+            cells = tempCells;
+
+            drawGrid();
+            
+            generations++;
+            skipFrame = false;
+        }
     }
     
+    /**
+     * Gets the number of adjacent alive cells next to a cell
+     * @param x the x coordinate of the cell to check
+     * @param y the y coordinate of the cell to check
+     * @return the number of adjacent alive cells
+     */
     private int getNumAdjCells(int x, int y) {
         int sum = 0;
         for (int cx = x - 1; cx < x + 2; cx++) {
@@ -137,16 +160,6 @@ public class GameController {
         }
         return sum;
     }
-    
-//    private void drawChanges(Map<String, Coordinates> map1, Map<String, Coordinates> map2, Paint fill) {
-//        map1.entrySet().stream().filter((entry) -> {
-//            Coordinates pos = entry.getValue();
-//            return map2.get(entry.getKey()) == null && pos.getX() >= 0 && pos.getX() < gridWidth && pos.getY() >= 0 && pos.getY() < gridHeight;
-//        }).forEach((entry) -> {
-//            Coordinates pos = entry.getValue();
-//            drawSquare(pos.getX(), pos.getY(), fill, Color.SILVER);
-//        });
-//    }
     
     /**
      * Toggles a cell at the specified coordinates, more precisely it creates
@@ -187,17 +200,6 @@ public class GameController {
     }
     
     /**
-     * Clears the cell storage and game grid
-     */
-    public void clear() {
-        cells.entrySet().stream().forEach((entry) -> {
-            Coordinates pos = entry.getValue();
-            drawSquare(pos.getX(), pos.getY(), Color.WHITE, Color.SILVER);
-        });
-        cells.clear();
-    }
-    
-    /**
      * Changes to size of the active game grid viewed on the canvas by 1 in
      * each dimension
      * @param increase true if the game should be zoomed in and false otherwise
@@ -219,8 +221,14 @@ public class GameController {
         drawGrid();
     }
     
+    /**
+     * Constructs a hashkey from the specified x and y coordinates
+     * @param x the x coordinate to construct from
+     * @param y the y coordinate to construct from
+     * @return the constructed hashkey
+     */
     private String getHashKey(int x, int y) {
-        return "" + x + "_" + y;
+        return x + "_" + y;
     }
     
     /**
@@ -236,9 +244,10 @@ public class GameController {
      * @param index the index of the machine to retrieve
      */
     public void drawMachine(int index) {
-        int machineWidth = machines.get(index).getWidth(), machineHeight = machines.get(index).getHeight();
+        Machine machine = machines.get(index);
+        int machineWidth = machine.getWidth(), machineHeight = machine.getHeight();
         int startX = gridWidth / 2 - machineWidth / 2, startY = gridHeight / 2 - machineHeight / 2;
-        boolean[][] machineTemplate = machines.get(index).getTemplate();
+        boolean[][] machineTemplate = machine.getTemplate();
         for (int i = 0; i < machineHeight; i++) {
             for (int j = 0; j < machineWidth; j++) {
                 if (machineTemplate[i][j]) {
@@ -248,6 +257,18 @@ public class GameController {
                 }
             }
         }
+    }
+    
+    public void reset() {
+        generations = 0;
+        paused = true;
+        frameDelay = 0;
+        clear();
+    }
+    
+    public void clear() {
+        cells.clear();
+        drawGrid();
     }
     
     /**
@@ -265,5 +286,29 @@ public class GameController {
      */
     public int getNumberOfMachines() {
         return machines.size();
+    }
+    
+    public void togglePaused() {
+        paused = !paused;
+    }
+    
+    public boolean isPaused() {
+        return paused;
+    }
+    
+    public void skipFrame() {
+        skipFrame = true;
+    }
+    
+    public void setFrameDelay(int delay) {
+        frameDelay = delay * 1_000_000;
+    }
+    
+    public int getFrameDelay() {
+        return frameDelay;
+    }
+    
+    public int getNumGenerations() {
+        return generations;
     }
 }
