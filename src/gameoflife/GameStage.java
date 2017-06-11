@@ -58,7 +58,7 @@ public class GameStage extends Stage {
     private final Canvas gameCanvas;
     private final GraphicsContext gameGC;
     
-    private final GameController gameController;    
+    private final GameController game;    
         
     /**
      * Default constructor
@@ -73,7 +73,7 @@ public class GameStage extends Stage {
         
         gameGC = gameCanvas.getGraphicsContext2D();
         
-        gameController = new GameController(gameGC, gridWidth, gridHeight);     
+        game = new GameController(gameGC, gridWidth, gridHeight);     
         
         root.add(btnToolbar, 0, 0);
         root.add(lblToolbar, 1, 0);
@@ -81,7 +81,7 @@ public class GameStage extends Stage {
         root.add(gameCanvas, 0, 2, 2, 1);
         
         scene.setOnScroll((ScrollEvent t) -> {
-            gameController.changeZoom(t.getDeltaY() < 0);
+            game.changeZoom(t.getDeltaY() < 0);
         });
         
         btnToolbar.setPadding(new Insets(5));
@@ -102,7 +102,7 @@ public class GameStage extends Stage {
         skipFrameBtn.setOnAction((ActionEvent t) -> skipFrame = true);
         
         resetBtn.setOnAction((ActionEvent t) -> {
-            gameController.clear();
+            game.clear();
             genCounter = 0;
             timeCounter = 0;
             updateStates = false;
@@ -128,18 +128,19 @@ public class GameStage extends Stage {
         machineToolbar.setAlignment(Pos.CENTER_LEFT);
         machineToolbar.getChildren().addAll(machineLbl);
         
-        gameController.getMachines().stream().forEach((machine) -> {
-            Button newBtn = new Button((String) machine[0]);
+        for (int i = 0; i < game.getNumberOfMachines(); i++) {
+            final int index = i;
+            Button newBtn = new Button(game.getMachineName(index));
             newBtn.setOnAction((ActionEvent t) -> {
-                gameController.clear();
-                gameController.drawMachine(machine);
+                game.clear();
+                game.drawMachine(index);
             });
             machineBtns.add(newBtn);
-        });
+        }
         machineToolbar.getChildren().addAll(machineBtns);
         
         gameCanvas.setOnMouseClicked((MouseEvent t) -> {
-            gameController.toggleCell(gameController.convertX(t.getX()), gameController.convertY(t.getY()));
+            game.toggleCell(game.convertX(t.getX()), game.convertY(t.getY()));
         });
         
         this.setTitle("Conway's Game of Life");
@@ -154,7 +155,7 @@ public class GameStage extends Stage {
             @Override
             public void handle(long currentNanoTime) {
                 if (updateStates && currentNanoTime - updateNanoTime >= frameDelay * 1_000_000 || skipFrame) {
-                    gameController.updateStates();
+                    game.updateStates();
                     frameCounter++;
                     genCounter++;
                     skipFrame = false;
@@ -172,7 +173,7 @@ public class GameStage extends Stage {
                 
                 genLbl.setText("Generations: " + String.valueOf(genCounter));
                 
-                cellsLbl.setText("Cells: " + gameController.getNumCells());
+                cellsLbl.setText("Cells: " + game.getNumCells());
                 
                 timeElapsedLbl.setText("Time Elapsed: " + timeCounter + "s");
             }

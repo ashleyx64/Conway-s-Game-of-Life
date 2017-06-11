@@ -20,10 +20,8 @@ public class GameController {
     private final double gameWidth, gameHeight;
     private double hFactor, vFactor;
     private Map<String, Coordinates> cells = new HashMap<>();
-    private final Map<String, Coordinates> newCells = new HashMap<>();
-    private final ArrayList<Coordinates> checks = new ArrayList<>();
     private final GraphicsContext gc;
-    private final List<Object[]> machines = new ArrayList<>();
+    private final List<Machine> machines = new ArrayList<>();
     
     /**
      * Sets all initial variables and scans in the example machines
@@ -53,14 +51,14 @@ public class GameController {
         Scanner scannner = new Scanner(this.getClass().getResourceAsStream("exampleMachines.txt"));
         while (scannner.hasNext()) {
             String machineName = scannner.next();
-            int x = scannner.nextInt(), y = scannner.nextInt();
-            boolean[][] machineTemplate = new boolean[y][x];
-            for (int i = 0; i < y; i++) {
-                for (int j = 0; j < x; j++) {
+            int machineWidth = scannner.nextInt(), machineHeight = scannner.nextInt();
+            boolean[][] machineTemplate = new boolean[machineHeight][machineWidth];
+            for (int i = 0; i < machineHeight; i++) {
+                for (int j = 0; j < machineWidth; j++) {
                     machineTemplate[i][j] = scannner.next().charAt(0) == 'X';
                 }
             }
-            machines.add(new Object[] {machineName, x, y, machineTemplate});
+            machines.add(new Machine(machineName, machineWidth, machineHeight, machineTemplate));
         }
     }
     
@@ -94,44 +92,39 @@ public class GameController {
      */
     public void updateStates() {
         //Add all alive cells and their surrounding cells to the checks array
+        Map<String, Coordinates> checks = new HashMap<>();
         cells.values().stream().forEach((pos) -> {
             int x = pos.getX(), y = pos.getY();
             for (int cx = x - 1; cx < x + 2; cx++) {
                 for (int cy = y - 1; cy < y + 2; cy++) {
-                    checks.add(pos);
+                    checks.putIfAbsent(getHashKey(cx, cy), new Coordinates(cx, cy));
                 }
             }
         });
         
         //For each pair of coordinates in checks compute whether the state
-        //of the cell at those coordinates should be toggled or not and mark
-        //those coordinates if so
-        checks.stream().forEach((pos) -> {
+        //of the cell at those coordinates should be changed or not
+        Map<String, Coordinates> tempCells = new HashMap<>(cells);
+        checks.values().stream().forEach((pos) -> {
             int x = pos.getX(), y = pos.getY();
             String hashKey = getHashKey(x, y);
-            int adjCells = getAdjCells(x, y);
+            int adjCells = getNumAdjCells(x, y);
             if (cells.get(hashKey) == null) {
                 if (adjCells == 3) {
-                    newCells.putIfAbsent(hashKey, pos);
+                    tempCells.put(hashKey, pos);
                 }
             } else {
-                if (adjCells >= 2 && adjCells <= 3) {
-                    newCells.putIfAbsent(hashKey, pos);
+                if (adjCells < 2 || adjCells > 3) {
+                    tempCells.remove(hashKey);
                 }
             }            
         });
-        checks.clear();
         
-        //Draw any cell changes
-        drawChanges(newCells, cells, Color.BLACK);
-        drawChanges(cells, newCells, Color.WHITE);
-        
-        //Copy the new map into the old map and clear the new map
-        cells = new HashMap<>(newCells);
-        newCells.clear();
+        cells = tempCells;
+        drawGrid();
     }
     
-    private int getAdjCells(int x, int y) {
+    private int getNumAdjCells(int x, int y) {
         int sum = 0;
         for (int cx = x - 1; cx < x + 2; cx++) {
             for (int cy = y - 1; cy < y + 2; cy++) {
@@ -145,15 +138,15 @@ public class GameController {
         return sum;
     }
     
-    private void drawChanges(Map<String, Coordinates> map1, Map<String, Coordinates> map2, Paint fill) {
-        map1.entrySet().stream().filter((entry) -> {
-            Coordinates pos = entry.getValue();
-            return map2.get(entry.getKey()) == null && pos.getX() >= 0 && pos.getX() < gridWidth && pos.getY() >= 0 && pos.getY() < gridHeight;
-        }).forEach((entry) -> {
-            Coordinates pos = entry.getValue();
-            drawSquare(pos.getX(), pos.getY(), fill, Color.SILVER);
-        });
-    }
+//    private void drawChanges(Map<String, Coordinates> map1, Map<String, Coordinates> map2, Paint fill) {
+//        map1.entrySet().stream().filter((entry) -> {
+//            Coordinates pos = entry.getValue();
+//            return map2.get(entry.getKey()) == null && pos.getX() >= 0 && pos.getX() < gridWidth && pos.getY() >= 0 && pos.getY() < gridHeight;
+//        }).forEach((entry) -> {
+//            Coordinates pos = entry.getValue();
+//            drawSquare(pos.getX(), pos.getY(), fill, Color.SILVER);
+//        });
+//    }
     
     /**
      * Toggles a cell at the specified coordinates, more precisely it creates
@@ -240,14 +233,14 @@ public class GameController {
     
     /**
      * Draws the specified machine to the game grid
-     * @param machine the machine that is to be written
+     * @param index the index of the machine to retrieve
      */
-    public void drawMachine(Object[] machine) {
-        int machX = (int) machine[1], machY = (int) machine[2];
-        int startX = gridWidth / 2 - machX / 2, startY = gridHeight / 2 - machY / 2;
-        boolean[][] machineTemplate = (boolean[][]) machine[3];
-        for (int i = 0; i < machY; i++) {
-            for (int j = 0; j < machX; j++) {
+    public void drawMachine(int index) {
+        int machineWidth = machines.get(index).getWidth(), machineHeight = machines.get(index).getHeight();
+        int startX = gridWidth / 2 - machineWidth / 2, startY = gridHeight / 2 - machineHeight / 2;
+        boolean[][] machineTemplate = machines.get(index).getTemplate();
+        for (int i = 0; i < machineHeight; i++) {
+            for (int j = 0; j < machineWidth; j++) {
                 if (machineTemplate[i][j]) {
                     int x = j + startX, y = i + startY;
                     cells.put(getHashKey(x, y), new Coordinates(x, y));
@@ -258,10 +251,19 @@ public class GameController {
     }
     
     /**
-     * Returns the ArrayList that stores the machines
-     * @return the list of machines
+     * Gets the name of the machine at the specified index
+     * @param index the index of the machine to get
+     * @return the name of the specified machine
      */
-    public List<Object[]> getMachines() {
-        return machines;
+    public String getMachineName(int index) {
+        return machines.get(index).getName();
+    }
+    
+    /**
+     * Gets the number of machines loaded into the game
+     * @return the number of machines
+     */
+    public int getNumberOfMachines() {
+        return machines.size();
     }
 }
