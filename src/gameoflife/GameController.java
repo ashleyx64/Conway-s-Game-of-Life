@@ -259,6 +259,9 @@ public class GameController {
         }
     }
     
+    /**
+     * Reset the global variables and clear the game grid
+     */
     public void reset() {
         generations = 0;
         paused = true;
@@ -266,6 +269,9 @@ public class GameController {
         clear();
     }
     
+    /**
+     * Clear the game grid
+     */
     public void clear() {
         cells.clear();
         drawGrid();
@@ -288,26 +294,48 @@ public class GameController {
         return machines.size();
     }
     
+    /**
+     * Toggle whether the game is paused or not
+     */
     public void togglePaused() {
         paused = !paused;
     }
     
+    /**
+     * Get whether the game is paused or not
+     * @return whether the game is paused or not
+     */
     public boolean isPaused() {
         return paused;
     }
     
+    /**
+     * Tells the game to skip a frame when the game is paused
+     */
     public void skipFrame() {
         skipFrame = true;
     }
     
+    /**
+     * Sets the delay between frames for the game
+     * @param delay the delay in ms between frames
+     */
     public void setFrameDelay(int delay) {
         frameDelay = delay * 1_000_000;
     }
     
+    /**
+     * Gets the delay between frames
+     * @return the delay between frames in ms
+     */
     public int getFrameDelay() {
         return frameDelay;
     }
     
+    /**
+     * Get the number of generations that have passed since the game was started
+     * @return the number of generations
+     */
     public int getNumGenerations() {
         return generations;
     }
