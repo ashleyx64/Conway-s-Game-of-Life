@@ -23,6 +23,7 @@ public class GameController extends AnimationTimer {
     private final double gameWidth, gameHeight;
     private double hFactor, vFactor;
     private Map<String, Coordinates> cells = new HashMap<>();
+    private Map<String, Coordinates> checks = new HashMap<>();
     private final GraphicsContext gc;
     private final List<Machine> machines = new ArrayList<>();
 
@@ -78,29 +79,51 @@ public class GameController extends AnimationTimer {
     }
 
     /**
-     * Draws the game to the specified GraphicsContext given in the constructor
+     * Draws the initial game grid to the specified GraphicsContext given in
+     * the constructor
      */
-    public void drawGrid() {
-        //For the size of the grid determine whether there is a cell at each
-        //coordinate and draw the corresponding colour
+    private void drawGrid() {
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
-                if (cells.get(getHashKey(x, y)) == null) {
-                    drawSquare(x, y, Color.WHITE, Color.SILVER);
-                } else {
-                    drawSquare(x, y, Color.BLACK, Color.SILVER);
-                }
+                drawSquare(x, y, Color.WHITE, Color.SILVER);
             }
         }
+    }
+    
+    /**
+     * Draw the changes to the game grid since the last cell states
+     */
+    private void drawChanges() {
+        checks.values().forEach((pos) -> {
+            int x = pos.getX(), y = pos.getY();
+            if (isOnGrid(x, y)) {
+                if (cells.containsKey(getHashKey(x, y))) {
+                    drawSquare(x, y, Color.BLACK, Color.SILVER);
+                } else {
+                    drawSquare(x, y, Color.WHITE, Color.SILVER);
+                }
+            }
+        });
+    }
+    
+    /**
+     * Checks whether a given coordinate is on the current game grid
+     * 
+     * @param x the x coordinate to check
+     * @param y the y coordinate to check
+     * @return true if the given coordinate is on the game grid
+     */
+    private boolean isOnGrid(int x, int y) {
+        return x >= 0 && y >= 0 && x < gridWidth && y < gridHeight;
     }
 
     /**
      * Draws a square on the specified GraphicsContext
      *
-     * @param x
-     * @param y
-     * @param fill
-     * @param stroke
+     * @param x the x coordinate to draw to
+     * @param y the y coordinate to draw to
+     * @param fill the fill color to apply to the square
+     * @param stroke the line color to appy to the square
      */
     private void drawSquare(int x, int y, Paint fill, Paint stroke) {
         gc.setLineWidth(2);
@@ -115,7 +138,7 @@ public class GameController extends AnimationTimer {
      */
     public void updateCellStates() {
         //Add all alive cells and their surrounding cells to the checks array
-        Map<String, Coordinates> checks = new HashMap<>();
+        checks = new HashMap<>();
         cells.values().stream().forEach((pos) -> {
             int x = pos.getX(), y = pos.getY();
             for (int cx = x - 1; cx < x + 2; cx++) {
@@ -144,7 +167,7 @@ public class GameController extends AnimationTimer {
         });
         cells = tempCells;
 
-        drawGrid();
+        drawChanges();
 
         generations++;
     }
