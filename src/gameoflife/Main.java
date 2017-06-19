@@ -26,7 +26,13 @@ import javafx.stage.Stage;
  * @author Ashley Allen
  */
 public class Main extends Application {
-
+    
+    /**
+     * Inherited from Application. Sets up all the graphical window elements
+     * as well as manages updating the labels using an AnimationTimer
+     * 
+     * @param primaryStage the primary Stage to display the Application on
+     */
     @Override
     public void start(Stage primaryStage) {
         final int gridWidth = 50, gridHeight = 50;
@@ -54,9 +60,7 @@ public class Main extends Application {
 
         //A button to reset the game
         final Button resetBtn = new Button("Reset");
-        resetBtn.setOnAction((ActionEvent t) -> {
-            game.reset();
-        });
+        resetBtn.setOnAction((ActionEvent t) -> game.reset());
 
         final Label frameDelayLbl = new Label("Frame delay (ms):");
 
@@ -80,7 +84,8 @@ public class Main extends Application {
         final Label genLbl = new Label("Generations: 0");
         final Label cellsLbl = new Label("Cells: 0");
         final Label timeElapsedLbl = new Label("Time Elapsed: 0s");
-
+        
+        //An AnimationTimer to regularly update the statistical labels
         new AnimationTimer() {
 
             @Override

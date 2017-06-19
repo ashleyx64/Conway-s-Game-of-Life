@@ -11,7 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 /**
- * The class that handles all the game logic including: drawing the game to the
+ * Handles all the game logic including: drawing the game to the
  * canvas, updating the state of the cells after each generation and processing
  * the zoom level of the grid
  *
@@ -91,7 +91,7 @@ public class GameController extends AnimationTimer {
     }
     
     /**
-     * Draw the changes to the game grid since the last cell states
+     * Draws the changes to the game grid since the last cell states
      */
     private void drawChanges() {
         checks.values().forEach((pos) -> {
@@ -325,7 +325,7 @@ public class GameController extends AnimationTimer {
     }
 
     /**
-     * Reset the global variables and clear the game grid
+     * Resets the global variables and clear the game grid
      */
     public void reset() {
         generations = 0;
@@ -336,7 +336,7 @@ public class GameController extends AnimationTimer {
     }
 
     /**
-     * Clear the game grid
+     * Clears the game grid
      */
     public void clear() {
         cells.clear();
@@ -363,14 +363,14 @@ public class GameController extends AnimationTimer {
     }
 
     /**
-     * Toggle whether the game is paused or not
+     * Toggles whether the game is paused or not
      */
     public void togglePaused() {
         paused = !paused;
     }
 
     /**
-     * Get whether the game is paused or not
+     * Getswhether the game is paused or not
      *
      * @return whether the game is paused or not
      */
@@ -404,7 +404,7 @@ public class GameController extends AnimationTimer {
     }
 
     /**
-     * Get the number of generations that have passed since the game was started
+     * Gets the number of generations that have passed since the game was started
      *
      * @return the number of generations
      */
