@@ -22,50 +22,48 @@ import javafx.stage.Stage;
 
 /**
  * Main class
+ *
  * @author Ashley Allen
  */
 public class Main extends Application {
-    private int timeCounter = 0;
-    
+
     @Override
     public void start(Stage primaryStage) {
         final int gridWidth = 50, gridHeight = 50;
         final double gameWidth = 1000, gameHeight = 1000;
-        
+
         //The game canvas that will display the game grid
-        final Canvas canvas = new Canvas(gameWidth, gameHeight);       
-        
+        final Canvas canvas = new Canvas(gameWidth, gameHeight);
+
         //The GameController that will control the game
         final GameController game = new GameController(canvas.getGraphicsContext2D(), gridWidth, gridHeight);
-        
+
         //When the canvas is clicked toggle the cell at that location
         canvas.setOnMouseClicked((MouseEvent t) -> {
             game.toggleCell(game.convertX(t.getX()), game.convertY(t.getY()));
         });
-        
+
         //A button to play and pause the game
         final Button playPauseBtn = new Button("Play");
         playPauseBtn.setPrefWidth(60);
         playPauseBtn.setOnAction((ActionEvent t) -> game.togglePaused());
-        
+
         //A button to skip a frame of the game
         final Button skipFrameBtn = new Button("Skip Frame");
         skipFrameBtn.setOnAction((ActionEvent t) -> game.skipFrame());
-        
+
         //A button to reset the game
         final Button resetBtn = new Button("Reset");
         resetBtn.setOnAction((ActionEvent t) -> {
             game.reset();
-            playPauseBtn.setText("Play");
-            timeCounter = 0;
         });
-        
+
         final Label frameDelayLbl = new Label("Frame delay (ms):");
-        
+
         //A TextField to allow the user to specify the frame delay
         final TextField frameDelayTxtFld = new TextField();
         frameDelayTxtFld.setPrefWidth(60);
-        
+
         //A button to confirm entry of a new frame delay
         final Button frameDelayBtn = new Button("Update");
         frameDelayBtn.setOnAction((ActionEvent t) -> {
@@ -76,70 +74,46 @@ public class Main extends Application {
             }
             canvas.requestFocus();
         });
-        
+
         //Labels to show statistics to the player
         final Label fpsLbl = new Label("FPS: 0");
         final Label genLbl = new Label("Generations: 0");
         final Label cellsLbl = new Label("Cells: 0");
         final Label timeElapsedLbl = new Label("Time Elapsed: 0s");
-        
-        final Label machineLbl = new Label("Machines:");
-        
-        //Animation timer that ticks the game over at a set interval and also
-        //updates labels
+
         new AnimationTimer() {
-            
-            long updateNanoTime = System.nanoTime();
-            long secondsNanoTime = System.nanoTime();
-            long frameCounter = 0;
-            
+
             @Override
-            public void handle(long currentNanoTime) {
-                //If sufficient time has passed between frames tick the game
-                if (currentNanoTime - updateNanoTime >= game.getFrameDelay()) {
-                    game.tick();
-                    frameCounter++;                    
-                    updateNanoTime = currentNanoTime;              
-                }
-                
-                //Every time a second passes update the time counter and FPS
-                //label
-                if (currentNanoTime - secondsNanoTime >= 1_000_000_000) {
-                    if (!game.isPaused()) {
-                        timeCounter++;
-                    }
-                    fpsLbl.setText("FPS: " + frameCounter);                    
-                    frameCounter = 0;
-                    secondsNanoTime = currentNanoTime;
-                }
-                
-                //Update labels
-                playPauseBtn.setText(game.isPaused() ? "Play" : "Pause");
+            public void handle(long now) {
+                fpsLbl.setText("FPS: " + game.getFPS());
                 genLbl.setText("Generations: " + game.getNumGenerations());
                 cellsLbl.setText("Cells: " + game.getNumCells());
-                timeElapsedLbl.setText("Time elapsed: " + timeCounter);
+                timeElapsedLbl.setText("Time Elapsed: " + game.getTimeElapsed());
+                playPauseBtn.setText(game.isPaused() ? "Play" : "Pause");
             }
-            
+
         }.start();
-        
+
+        final Label machineLbl = new Label("Machines:");
+
         //The toolbar that will store the buttons
         final HBox btnToolbar = new HBox(5);
         btnToolbar.setPadding(new Insets(5));
         btnToolbar.setAlignment(Pos.CENTER_LEFT);
-        btnToolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, frameDelayLbl, frameDelayTxtFld, frameDelayBtn);        
-        
+        btnToolbar.getChildren().addAll(playPauseBtn, skipFrameBtn, resetBtn, frameDelayLbl, frameDelayTxtFld, frameDelayBtn);
+
         //The toolbar that will store the labels
         final HBox lblToolbar = new HBox(5);
         lblToolbar.setPadding(new Insets(5));
         lblToolbar.setAlignment(Pos.CENTER_RIGHT);
         lblToolbar.getChildren().addAll(fpsLbl, genLbl, cellsLbl, timeElapsedLbl);
-        
+
         //The toolbar that will store the buttons to generate the machines
         final HBox machineToolbar = new HBox(5);
         machineToolbar.setPadding(new Insets(5));
         machineToolbar.setAlignment(Pos.CENTER_LEFT);
         machineToolbar.getChildren().addAll(machineLbl);
-        
+
         //Create a button for each machine imported from the 'exampleMachines.txt'
         //file and populate them into the toolbar
         final List<Button> machineBtns = new ArrayList<>();
@@ -152,24 +126,26 @@ public class Main extends Application {
             });
             machineBtns.add(newBtn);
         }
-        machineToolbar.getChildren().addAll(machineBtns);        
-        
+        machineToolbar.getChildren().addAll(machineBtns);
+
         //The root node that will manage all other nodes
         final GridPane root = new GridPane();
         root.add(btnToolbar, 0, 0);
         root.add(lblToolbar, 1, 0);
         root.add(machineToolbar, 0, 1, 2, 1);
-        root.add(canvas, 0, 2, 2, 1);        
+        root.add(canvas, 0, 2, 2, 1);
 
         //The main scene
         final Scene scene = new Scene(root);
         scene.setOnScroll((ScrollEvent t) -> {
             game.changeZoom(t.getDeltaY() < 0);
         });
-        
-        primaryStage.setScene(scene);        
-        primaryStage.setTitle("Conway's Game of Life");        
+
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Conway's Game of Life");
         primaryStage.show();
+
+        game.start();
     }
 
     /**
@@ -178,5 +154,5 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
