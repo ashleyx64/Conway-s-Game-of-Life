@@ -1,6 +1,6 @@
 # game-of-life
 
-A version of Conway's Game of Life created using JavaFX
+A version of [https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life](Conway's Game of Life) implemented in Java using JavaFX.
 
 ## Instructions
 
