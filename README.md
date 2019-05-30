@@ -1,23 +1,21 @@
-# Conway's Game of Life
+# game-of-life
 
-<b>A version of Conway's Game of Life created using JavaFX</b>
+**A version of Conway's Game of Life created using JavaFX**
 
-## Instructions:
+## Instructions
 
 Use the buttons at the top to control the game, click to turn cells on and off and use the scroll wheel to resize the game grid
 
-## Features:
+## Features
 
-<ul>
-  <li>Play/pause button</li>
-  <li>Skip frame button</li>
-  <li>Clear button</li>
-  <li>Variable frame delay</li>
-  <li>(Semi) infinite grid size</li>
-  <li>Statistics!</li>
-  <li>Resizable game grid</li>
-  <li>Ability to add a number of example machines</li>
-</ul>
+* Play/pause button
+* Skip frame button
+* Clear button
+* Variable frame delay
+* (Semi) infinite grid size
+* Statistics!
+* Resizable game grid
+* Ability to add a number of example machines
 
 ## License
 
