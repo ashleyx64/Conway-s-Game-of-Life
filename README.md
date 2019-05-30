@@ -1,6 +1,6 @@
 # game-of-life
 
-**A version of Conway's Game of Life created using JavaFX**
+A version of Conway's Game of Life created using JavaFX
 
 ## Instructions
 
